@@ -60,7 +60,7 @@ class Energy implements Serializable {
                 return false;
             }
             for (int i = 0; i < energyStates.length; i++) {
-                if (otherEnergyArr[i] != energyStates[i]) {
+                if (!otherEnergyArr[i].equals(energyStates[i])) {
                     return false;
                 }
             }
