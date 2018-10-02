@@ -1,7 +1,9 @@
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class GridDiagram {
+public class GridDiagram implements Serializable {
+    public static final long serialVersionUID = 0;
 
 
     public static final int INSERT_XO_COLUMN = 0;
@@ -613,7 +615,7 @@ public class GridDiagram {
 
 
 
-    public class Row{
+    public class Row implements Serializable{
         private int xCol;
         private int oCol;
         private int minCol;
@@ -655,7 +657,7 @@ public class GridDiagram {
             length = length*direction;
         }
     }
-    public class Column{
+    public class Column implements Serializable{
         private int xRow;
         private int oRow;
         private int minRow;
