@@ -28,7 +28,6 @@ public class RunWangLandau {
     }
 
     private static void parseArgs(String[] args){
-        int[] newArr;
         for (int i=0; i<args.length; i++){
             switch (args[i]){
                 case "-k":
@@ -44,11 +43,11 @@ public class RunWangLandau {
                     energy = appendInt(energy, Energy.ENERGYTYPE_WRITHE);
                     break;
                 case "-i":
-                case "--input":
+                case "--input-weights":
                     inputWeightsFile = args[i+1];
                     break;
                 case "-o":
-                case "--output":
+                case "--output-weights":
                     outputWeightsFile = args[i+1];
                     break;
                 case "-M":
@@ -59,7 +58,24 @@ public class RunWangLandau {
                 case "--min-size":
                     minSize = Integer.valueOf(args[i+1]);
                     break;
-            }
+                case "-f":
+                case "--initial-f":
+                    fStart = Double.valueOf(args[i+1]);
+                case "-ff":
+                case "--final-f":
+                    fFinal = Double.valueOf(args[i+1]);
+                case "-d":
+                case "--delta-f":
+                    fChange = Double.valueOf(args[i+1]);
+                case "-F":
+                case "--flat-check-frequency":
+                    flatCheckFrequency = Integer.valueOf(args[i+1]);
+                case "-s":
+                case "--steps":
+                    steps = Integer.valueOf(args[i+1]);
+                default:
+                    System.out.println("Unknown argument: "+args[i]);
+            }//TODO make sure options have good designators
         }
     }
 
