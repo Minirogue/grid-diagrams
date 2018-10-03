@@ -1,3 +1,8 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,51 +37,49 @@ public class GridDiagram implements Serializable {
         }
         this.size = initXCol.size();
     }
-    public GridDiagram(ArrayList<Integer> initXCol, ArrayList<Integer> initOCol){
-        ArrayList<Integer> initXRow = new ArrayList<>();
-        ArrayList<Integer> initORow = new ArrayList<>();
-        for (int i=0; i<initXCol.size(); i++){
-            initXRow.add(-1);
-            initORow.add(-1);
-        }
-        for (int i=0; i<initXCol.size(); i++){
-            initXRow.set(initXCol.get(i),i);
-            initORow.set(initOCol.get(i),i);
+    public GridDiagram(int[] initXCol, int[] initOCol){
+        int[] initXRow = new int[initXCol.length];
+        int[] initORow = new int[initOCol.length];
+        for (int i=0; i<initXCol.length; i++){
+            initXRow[initXCol[i]] = i;
+            initORow[initOCol[i]] = i;
         }
         rows = new ArrayList<>();
         cols = new ArrayList<>();
-        for (int i=0; i<initXCol.size(); i++){
-            cols.add(new Column(initXCol.get(i), initOCol.get(i)));
-            rows.add(new Row(initXRow.get(i), initORow.get(i)));
+        for (int i=0; i<initXCol.length; i++){
+            cols.add(new Column(initXCol[i], initOCol[i]));
+            rows.add(new Row(initXRow[i], initORow[i]));
         }
-        this.size = initXCol.size();
+        this.size = initXCol.length;
     }
     public GridDiagram(String linkName){
-        this(getXCol(linkName), getOCol(linkName));
+        try{
+            FileInputStream inFile = new FileInputStream(new File("knot_conformations/"+linkName+".grd"));
+            ObjectInputStream inObj = new ObjectInputStream(inFile);
+            GridDiagram diagramFromFile = (GridDiagram)inObj.readObject();
+            inObj.close();
+            inFile.close();
+            rows = diagramFromFile.getRows();
+            cols = diagramFromFile.getCols();
+            size = diagramFromFile.getSize();
+        } catch (FileNotFoundException e){
+            System.out.println("File not found");
+        } catch (IOException e){
+            //System.out.println("Error initializing input stream");
+            System.out.println(e);
+        } catch (ClassNotFoundException e){
+            System.out.println("File not correctly formatted");
+        }
     }
 
-    private static ArrayList<Integer> getXCol(String linkName){
-        ArrayList<Integer> newXCol = new ArrayList<>();
-        if (linkName.equals("3_1")){
-            for (int i=0; i<5; i++){
-                newXCol.add(i);
-            }
-        }
-        return newXCol;
-    }
-    private static ArrayList<Integer> getOCol(String linkName){
-        ArrayList<Integer> newOCol = new ArrayList<>();
-        if (linkName.equals("3_1")){
-            for (int i=0; i<5; i++){
-                newOCol.add((i+2)%5);
-            }
-        }
-        return newOCol;
-    }
 
     public int getSize(){ return size; }
     public Column getCol(int i){ return cols.get(i); }
     public Row getRow(int i){ return rows.get(i); }
+
+
+    private ArrayList<Row> getRows(){ return rows; }
+    private ArrayList<Column> getCols(){ return cols; }
 
     public void printToTerminal(){
         //System.out.println("Here is the grid:");
@@ -616,6 +619,8 @@ public class GridDiagram implements Serializable {
 
 
     public class Row implements Serializable{
+        public static final long serialVersionUID = 0;
+
         private int xCol;
         private int oCol;
         private int minCol;
@@ -629,6 +634,10 @@ public class GridDiagram implements Serializable {
             setMinAndMax();
         }
 
+        @Override
+        public String toString(){
+            return "X: "+xCol+" O: "+oCol;
+        }
 
         public int getXCol() { return xCol; }
         public int getOCol() { return oCol; }
@@ -656,8 +665,63 @@ public class GridDiagram implements Serializable {
             direction = (int)Math.signum(length);
             length = length*direction;
         }
+
+        public class Column implements Serializable{
+            public static final long serialVersionUID = 0;
+
+            private int xRow;
+            private int oRow;
+            private int minRow;
+            private int maxRow;
+            private int direction;
+            private int length;
+
+            public Column(int initXRow, int initORow){
+                xRow = initXRow;
+                oRow = initORow;
+                setMaxAndMin();
+            }
+
+            @Override
+            public String toString(){
+                return "X: "+xRow+" O: "+oRow;
+            }
+
+            public int getXRow() {
+                return xRow;
+            }
+            public int getORow() {
+                return oRow;
+            }
+            public int getMinRow(){ return minRow; }
+            public int getMaxRow(){ return maxRow; }
+            public int getDirection(){ return direction; }
+            public int getLength(){ return length; }
+            public void setXRow(int newXRow) {
+                xRow = newXRow;
+                setMaxAndMin();
+            }
+            public void setORow(int newORow) {
+                oRow = newORow;
+                setMaxAndMin();
+            }
+            private void setMaxAndMin(){
+                if (xRow < oRow){
+                    minRow = xRow;
+                    maxRow = oRow;
+                } else{
+                    minRow = oRow;
+                    maxRow = xRow;
+                }
+                length = oRow - xRow;
+                direction = (int)Math.signum(length);
+                length = length*direction;
+            }
+        }
     }
     public class Column implements Serializable{
+        public static final long serialVersionUID = 0;
+
         private int xRow;
         private int oRow;
         private int minRow;
@@ -669,6 +733,11 @@ public class GridDiagram implements Serializable {
             xRow = initXRow;
             oRow = initORow;
             setMaxAndMin();
+        }
+
+        @Override
+        public String toString(){
+            return "X: "+xRow+" O: "+oRow;
         }
 
         public int getXRow() {
