@@ -33,6 +33,7 @@ public class RunWangLandau {
                 case "-k":
                 case "--knot-type":
                     knotType = args[i+1];
+                    i++;
                     break;
                 case "-S":
                 case "--size":
@@ -45,34 +46,48 @@ public class RunWangLandau {
                 case "-i":
                 case "--input-weights":
                     inputWeightsFile = args[i+1];
+                    i++;
                     break;
                 case "-o":
                 case "--output-weights":
                     outputWeightsFile = args[i+1];
+                    i++;
                     break;
                 case "-M":
                 case "--max-size":
                     maxSize = Integer.valueOf(args[i+1]);
+                    i++;
                     break;
                 case "-m":
                 case "--min-size":
                     minSize = Integer.valueOf(args[i+1]);
+                    i++;
                     break;
                 case "-f":
                 case "--initial-f":
                     fStart = Double.valueOf(args[i+1]);
+                    i++;
+                    break;
                 case "-ff":
                 case "--final-f":
                     fFinal = Double.valueOf(args[i+1]);
+                    i++;
+                    break;
                 case "-d":
                 case "--delta-f":
                     fChange = Double.valueOf(args[i+1]);
+                    i++;
+                    break;
                 case "-F":
                 case "--flat-check-frequency":
                     flatCheckFrequency = Integer.valueOf(args[i+1]);
+                    i++;
+                    break;
                 case "-s":
                 case "--steps":
                     steps = Integer.valueOf(args[i+1]);
+                    i++;
+                    break;
                 default:
                     System.out.println("Unknown argument: "+args[i]);
             }//TODO make sure options have good designators
