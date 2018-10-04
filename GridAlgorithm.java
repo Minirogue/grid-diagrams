@@ -3,37 +3,21 @@ import java.util.ArrayList;
 
 public class GridAlgorithm {
 
-	public static final int MODE_WANG_LANDAU = 1;
-	public static final int MODE_Z = 2;
-
 	private GridDiagram gDiagram;
-	private int mode;
-	//zMode
 	private double z;
 	ArrayList<Double[]> probabilities;
-	//WangLandauMode
 
-	public GridAlgorithm(String knotName, int initMode, double initZ){
-		mode = initMode;
+	public GridAlgorithm(String knotName, double initZ){
 		gDiagram = new GridDiagram(knotName);
-		switch (mode){
-			case MODE_Z:
-				probabilities = new ArrayList<>();
-				probabilities.add(new Double[]{1.0,1.0,1.0});
-				z = initZ;
-				break;
-		}
+		probabilities = new ArrayList<>();
+		probabilities.add(new Double[]{1.0,1.0,1.0});
+		z = initZ;
 	}
 
 	public GridDiagram getGridDiagram(){ return gDiagram; }
 
 
-	public void run(int steps){
-		runZ(steps);
-	}
-	
-
-	private void runZ(int steps){
+	private void run(int steps){
 		int movetype;
 		int vertex;
 		int moveSubtype;
