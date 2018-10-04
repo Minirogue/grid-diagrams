@@ -11,6 +11,7 @@ public class RunWangLandau {
     private static double fFinal = .01;
     private static double fChange = .5;
     private static int flatCheckFrequency = 20;
+    private static boolean isTraining = false;
 
     public static void main(String[] args){
         parseArgs(args);
@@ -19,15 +20,16 @@ public class RunWangLandau {
         wl.setLowerSize(minSize);
         if (inputWeightsFile != null){
             wl.loadWeightsFromFile(inputWeightsFile);
+            wl.setDefaultWeightToMax();
         }
         if (outputWeightsFile != null){
             wl.setWeightsSaveFile(outputWeightsFile);
         }
 
-        System.out.println("Training Wang-Landau for "+knotType+" with the following parameters:");
+        System.out.println("Running Wang-Landau for "+knotType+" with the following parameters:");
         System.out.println("Minimum size: "+minSize);
         System.out.println("Maximum size: "+maxSize);
-        System.out.println("Energy = "+energy);
+        System.out.println("Energy = "+energyTypeAsString());
         System.out.println("With starting weights from "+ inputWeightsFile);
         System.out.println("Saving weights to "+outputWeightsFile);
         System.out.println("Sampling every "+steps+" steps");
@@ -35,6 +37,7 @@ public class RunWangLandau {
         System.out.println("With exponent changing by a factor of "+fChange);
         System.out.println("Until modification factor is less than e^"+fFinal);
         System.out.println("Checking for flatness every "+flatCheckFrequency+" samples");
+        System.out.println("Training = "+isTraining);
         wl.train(steps, flatCheckFrequency, fStart, fFinal, fChange);
     }
 
@@ -99,6 +102,10 @@ public class RunWangLandau {
                     steps = Integer.valueOf(args[i+1]);
                     i++;
                     break;
+                case "-t":
+                case "--train":
+                    isTraining = true;
+                    break;
                 default:
                     System.out.println("Unknown argument: "+args[i]);
             }//TODO make sure options have good designators
@@ -110,6 +117,27 @@ public class RunWangLandau {
         System.arraycopy(oldArr, 0, newArr, 0, oldArr.length);
         newArr[oldArr.length] = newEntry;
         return newArr;
+    }
+
+    private static String energyTypeAsString(){
+        String returnString = "(";
+        for (int i=0; i< energy.length; i++){
+            switch (energy[i]){
+                case Energy.ENERGYTYPE_SIZE:
+                    returnString += "Size";
+                    break;
+                case Energy.ENERGYTYPE_WRITHE:
+                    returnString += "Writhe";
+                    break;
+            }
+            if (i==energy.length-1){
+                returnString += ")";
+            }
+            else{
+                returnString += ", ";
+            }
+        }
+        return returnString;
     }
 }
 
