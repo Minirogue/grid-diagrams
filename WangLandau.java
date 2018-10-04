@@ -19,6 +19,7 @@ public class WangLandau {
 	private Energy nextEnergy;
 	private HashMap<Energy, Double> weights;
 	private String saveFile;
+	private double defaultWeight = 0.0;
 
 
 	public WangLandau(String knotName, int[] initEnergyType){
@@ -36,7 +37,14 @@ public class WangLandau {
 	public void setLowerSize(int newbound){ lowerSize = newbound; }
 
 	public HashMap<Energy, Double> getWeights(){ return weights; }
-
+	public void setDefaultWeightToMax(){
+		if (weights.isEmpty()){
+			defaultWeight = 0;
+		}
+		else{
+			defaultWeight = Collections.min(weights.values());
+		}
+	}
 
 	public boolean loadWeightsFromFile(String filename){
 		try{
@@ -135,7 +143,7 @@ public class WangLandau {
 		while (fCurrent > fFinal){
 			for (int i = 0; i<flatCheckFreq; i++){
 				run(steps);
-				currentWeight = weights.getOrDefault(currentEnergy, 0.0)+fCurrent;//TODO could the 0 here be replaced with some function of the existing weights?
+				currentWeight = weights.getOrDefault(currentEnergy, defaultWeight)+fCurrent;//TODO could the 0 here be replaced with some function of the existing weights?
 				/*if (currentMaxWeight < currentWeight){
 					currentMaxWeight = currentWeight;
 				}*/
