@@ -114,17 +114,41 @@ public class WangLandau {
 	public void train(int steps, int flatCheckFreq, double fStart, double fFinal, double fModFactor){
 		HashMap<Energy, Integer> histogram = new HashMap<>();
 		double fCurrent = fStart;
+		double currentWeight;//currentMaxWeight, currentMinWeight, 
+		int currentMinHistogram, currentMaxHistogram;
+		/*currentMinWeight = Integer.MAX_VALUE;
+		currentMaxWeight = Integer.MIN_VALUE;
+		for (HashMap.Entry<Energy, Double> entry : weights.entrySet()){
+			histogram.put(entry.getKey(), 0);
+			currentWeight = entry.getValue();
+			if (currentWeight < currentMinWeight){
+				currentMinWeight = currentWeight;
+			}
+			else if (currentMaxWeight < currentWeight){
+				currentMaxWeight = currentWeight;
+			}
+		}*/
+		for (Energy key : weights.keySet()){
+			histogram.put(key, 0);
+		}
 		run(steps*10);//warmup
 		while (fCurrent > fFinal){
 			for (int i = 0; i<flatCheckFreq; i++){
 				run(steps);
-				weights.put(currentEnergy,weights.getOrDefault(currentEnergy, 0.0)+fCurrent);
+				currentWeight = weights.getOrDefault(currentEnergy, 0.0)+fCurrent;//TODO could the 0 here be replaced with some function of the existing weights?
+				/*if (currentMaxWeight < currentWeight){
+					currentMaxWeight = currentWeight;
+				}*/
+				weights.put(currentEnergy,currentWeight);
 				histogram.put(currentEnergy, histogram.getOrDefault(currentEnergy,0)+1);
 			}
-			//System.out.println("Keys "+weights.keySet());
-			//System.out.println("Values "+weights.values());
-			if (Collections.min(histogram.values()) > .8*Collections.max(histogram.values())){
-				//System.out.println("Saving weights");
+			currentMinHistogram = Collections.min(histogram.values());
+			currentMaxHistogram = Collections.max(histogram.values());//TODO maybe there's a better way to track these
+			if (currentMinHistogram > .8*currentMaxHistogram){
+				normalizeWeights();
+				System.out.println("Saving weights");
+				System.out.println("Keys "+weights.keySet());
+				System.out.println("Values "+weights.values());
 				saveWeightsToFile();
 				fCurrent = fCurrent*fModFactor;
 				for (Energy key : histogram.keySet()){
@@ -135,6 +159,13 @@ public class WangLandau {
 		System.out.println("Final Weights: ");
 		System.out.println(weights.keySet());
 		System.out.println(weights.values());
+	}
+
+	private void normalizeWeights(){
+		double reduction_value = Collections.min(weights.values())-1;
+		for (Energy key : weights.keySet()){
+			weights.put(key, weights.get(key)-reduction_value);
+		}
 	}
 
 	private void run(int steps){
