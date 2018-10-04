@@ -24,6 +24,17 @@ public class RunWangLandau {
             wl.setWeightsSaveFile(outputWeightsFile);
         }
 
+        System.out.println("Training Wang-Landau for "+knotType+" with the following parameters:");
+        System.out.println("Minimum size: "+minSize);
+        System.out.println("Maximum size: "+maxSize);
+        System.out.println("Energy = "+energy);
+        System.out.println("With starting weights from "+ inputWeightsFile);
+        System.out.println("Saving weights to "+outputWeightsFile);
+        System.out.println("Sampling every "+steps+" steps");
+        System.out.println("Weights modified initially by e^"+fStart);
+        System.out.println("With exponent changing by a factor of "+fChange);
+        System.out.println("Until modification factor is less than e^"+fFinal);
+        System.out.println("Checking for flatness every "+flatCheckFrequency+" samples");
         wl.train(steps, flatCheckFrequency, fStart, fFinal, fChange);
     }
 
