@@ -1,4 +1,5 @@
-//import GridDiagram.*;
+package grid_tools;
+
 import java.util.ArrayList;
 
 public class GridAlgorithm {

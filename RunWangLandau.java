@@ -1,3 +1,5 @@
+package grid_tools;
+
 public class RunWangLandau {
 
     private static int maxSize = 100;

@@ -1,3 +1,5 @@
+package grid_tools;
+
 import java.io.Serializable;
 
 class Energy implements Serializable {
