@@ -1,5 +1,10 @@
 //package grid_tools;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+
 public class RunWangLandau {
 
     private static int maxSize = 100;
@@ -25,21 +30,10 @@ public class RunWangLandau {
             wl.setDefaultWeightToMax();
         }
         if (outputWeightsFile != null){
-            wl.setWeightsSaveFile(outputWeightsFile);
+            wl.setWeightsSaveFile(outputWeightsFile+".ser");
         }
 
-        System.out.println("Running Wang-Landau for "+knotType+" with the following parameters:");
-        System.out.println("Minimum size: "+minSize);
-        System.out.println("Maximum size: "+maxSize);
-        System.out.println("Energy = "+energyTypeAsString());
-        System.out.println("With starting weights from "+ inputWeightsFile);
-        System.out.println("Saving weights to "+outputWeightsFile);
-        System.out.println("Sampling every "+steps+" steps");
-        System.out.println("Weights modified initially by e^"+fStart);
-        System.out.println("With exponent changing by a factor of "+fChange);
-        System.out.println("Until modification factor is less than e^"+fFinal);
-        System.out.println("Checking for flatness every "+flatCheckFrequency+" samples");
-        System.out.println("Training = "+isTraining);
+        printLogFile();
         wl.train(steps, flatCheckFrequency, fStart, fFinal, fChange);
     }
 
@@ -48,7 +42,7 @@ public class RunWangLandau {
             switch (args[i]){
                 case "-k":
                 case "--knot-type":
-                    knotType = args[i+1];
+                    knotType = args[i+1].replaceAll("\\s+","");;
                     i++;
                     break;
                 case "-S":
@@ -140,6 +134,30 @@ public class RunWangLandau {
             }
         }
         return returnString;
+    }
+
+    private static void printLogFile(){
+        try{
+            PrintWriter writer = new PrintWriter(outputWeightsFile+".log", "UTF-8");
+            writer.println("Running Wang-Landau for "+knotType+" with the following parameters:");
+            writer.println("Minimum size: "+minSize);
+            writer.println("Maximum size: "+maxSize);
+            writer.println("Energy = "+energyTypeAsString());
+            writer.println("With starting weights from "+ inputWeightsFile);
+            writer.println("Saving weights to "+outputWeightsFile);
+            writer.println("Sampling every "+steps+" steps");
+            writer.println("Weights modified initially by e^"+fStart);
+            writer.println("With exponent changing by a factor of "+fChange);
+            writer.println("Until modification factor is less than e^"+fFinal);
+            writer.println("Checking for flatness every "+flatCheckFrequency+" samples");
+            writer.println("Training = "+isTraining);
+            writer.close();
+        }catch (FileNotFoundException e){
+            System.out.println(e);
+            System.exit(1);
+        }catch (UnsupportedEncodingException e){
+            System.out.println (e);
+        }
     }
 }
 
