@@ -12,7 +12,7 @@ public class RunWangLandau {
     private static String knotType = "3_1";
     private static int[] energy = new int[0];
     private static String inputWeightsFile;
-    private static String outputFile;
+    private static String outputFilePath;
     private static int steps = 10000;
     private static double fStart = 1;
     private static double fFinal = .01;
@@ -33,29 +33,25 @@ public class RunWangLandau {
             wl.loadWeightsFromFile(inputWeightsFile);
             wl.setDefaultWeightToMax();
         }
-        
-        printLogFile();
+        if (outputFilePath == null){
+    		System.err.println("output path not specified");
+    		System.exit(1);
+    	}else{
+        	wl.setOutputPath(outputFilePath);
+        }
         if (isTraining){
-        	if (outputFile != null){
-            	wl.setWeightsSaveFile(outputFile);
-        	} 
         	wl.setMakeMovie(isMakeMovie);
         	wl.setHistThreshold(histThreshold);
+        	printTrainingLogFile();
         	wl.train(steps, flatCheckFrequency, fStart, fFinal, fChange);
         }
-        else  if (isSampling){
-        	if (outputFile == null){
-        		System.err.println("output file not specified");
-        		System.exit(1);
-        	}
-        	wl.run(steps*10);
-        	for (int i=0; i<numSamples; i++){
-        		wl.run(steps);
-        		//TODO save to file
-        	}
+        else if (isSampling){
+        	printSampleLogFile();
+        	wl.sample(steps, numSamples);
         }
         else {
-        	System.out.println("No mode selected. Use either --training or --sampling option.")
+        	System.out.println("No mode selected. Use either --training or --sampling option.");
+        	System.exit(1);
         }
     }
 
@@ -81,8 +77,8 @@ public class RunWangLandau {
                     i++;
                     break;
                 case "-o":
-                case "--output-weights":
-                    outputFile = args[i+1];
+                case "--output-path":
+                    outputFilePath = args[i+1];
                     i++;
                     break;
                 case "-M":
@@ -126,6 +122,8 @@ public class RunWangLandau {
                     break;
                 case "--sampling":
                 	isSampling = true;
+                	numSamples = Integer.valueOf(args[i+1]);
+                	i++;
                 	break;
                 case "-T":
                 case "--threshold":
@@ -170,23 +168,41 @@ public class RunWangLandau {
         return returnString;
     }
 
-    private static void printLogFile(){
+    private static void printTrainingLogFile(){
         try{
-            PrintWriter writer = new PrintWriter(outputWeightsFile+".log", "UTF-8");
-            writer.println("Running Wang-Landau for "+knotType+" with the following parameters:");
+            PrintWriter writer = new PrintWriter(outputFilePath+".log", "UTF-8");
+            writer.println("Training Wang-Landau for "+knotType+" with the following parameters:");
             writer.println("Minimum size: "+minSize);
             writer.println("Maximum size: "+maxSize);
             writer.println("Energy = "+energyTypeAsString());
             writer.println("With starting weights from "+ inputWeightsFile);
-            writer.println("Saving weights to "+outputWeightsFile);
+            writer.println("Saving weights to "+outputFilePath+".wts");
             writer.println("Sampling every "+steps+" steps");
             writer.println("Weights modified initially by e^"+fStart);
             writer.println("With exponent changing by a factor of "+fChange);
             writer.println("Until modification factor is less than e^"+fFinal);
             writer.println("Checking for flatness every "+flatCheckFrequency+" samples");
-            writer.println("Training = "+isTraining);
             writer.println("Histogram threshold = "+histThreshold);
             writer.println("outputting to movie? "+isMakeMovie);
+            writer.close();
+        }catch (FileNotFoundException e){
+            System.out.println(e);
+            System.exit(1);
+        }catch (UnsupportedEncodingException e){
+            System.out.println (e);
+        }
+    }
+
+    private static void printSampleLogFile(){
+    	try{
+            PrintWriter writer = new PrintWriter(outputFilePath+".log", "UTF-8");
+            writer.println("Sampling Wang-Landau for "+knotType+" with the following parameters:");
+            writer.println("Minimum size: "+minSize);
+            writer.println("Maximum size: "+maxSize);
+            writer.println("Energy = "+energyTypeAsString());
+            writer.println("With starting weights from "+ inputWeightsFile);
+            writer.println("Saving samples to "+outputFilePath+".grds");
+            writer.println("Sampling every "+steps+" steps");
             writer.close();
         }catch (FileNotFoundException e){
             System.out.println(e);
