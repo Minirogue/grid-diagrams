@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -23,7 +24,7 @@ public class WangLandau {
 	private Energy currentEnergy;
 	private Energy nextEnergy;
 	private HashMap<Energy, Double> weights;
-	private String saveFile;
+	private String outputPath;
 	private double defaultWeight = 0.0;
 	private boolean makeMovie = false;
 	private int histThreshold = Integer.MAX_VALUE;
@@ -32,14 +33,14 @@ public class WangLandau {
 	public WangLandau(String knotName, int[] initEnergyType){
 		gDiagram = new GridDiagram(knotName);
 		Energy.setEnergyType(initEnergyType);
-		currentEnergy = new Energy(gDiagram);
+		calcAndSetCurrentEnergy();
 		weights = new HashMap<>();
 		upperSize = 100;//TODO don't hardcode
 		lowerSize = 0;//TODO don't hardcode
 		gDiagram.printToTerminal();
 	}
 
-	public void setWeightsSaveFile(String filename){ saveFile = filename; }
+	public void setOutputPath(String filename){ outputPath = filename; }
 	public void setUpperSize(int newbound){ upperSize = newbound; }
 	public void setLowerSize(int newbound){ lowerSize = newbound; }
 	public void setHistThreshold(int newthreshold){
@@ -80,9 +81,9 @@ public class WangLandau {
 		return false;
 	}
 	private boolean saveWeightsToFile(){
-		if (saveFile != null){
+		if (outputPath != null){
 			try{
-				FileOutputStream outFile = new FileOutputStream(new File(saveFile+".ser"));
+				FileOutputStream outFile = new FileOutputStream(new File(outputPath+".wts"));
 				ObjectOutputStream outObj = new ObjectOutputStream(outFile);
 				outObj.writeObject(weights);
 				outObj.close();
@@ -102,8 +103,8 @@ public class WangLandau {
 		String weightString = "";
 		String histString = "";
 		try{
-			File weightFile = new File(saveFile+"_weights.txt");
-			File histFile = new File(saveFile+"_histogram.txt");
+			File weightFile = new File(outputPath+"_weights.txt");
+			File histFile = new File(outputPath+"_histogram.txt");
 			FileWriter weightWriter = new FileWriter(weightFile, true);
 			FileWriter histWriter = new FileWriter(histFile, true);
 			for (int i = lowerSize; i <= upperSize; i++){
@@ -165,8 +166,8 @@ public class WangLandau {
 		int currentMinHistogram, currentMaxHistogram;
 		if (makeMovie){
 			try{
-				Files.deleteIfExists(Paths.get(saveFile+"_weights.txt"));
-				Files.deleteIfExists(Paths.get(saveFile+"_histogram.txt"));
+				Files.deleteIfExists(Paths.get(outputPath+"_weights.txt"));
+				Files.deleteIfExists(Paths.get(outputPath+"_histogram.txt"));
 			}catch (IOException e){
 				System.out.println(e);
 			}
@@ -230,6 +231,24 @@ public class WangLandau {
 		}
 	}
 
+	public void sample(int steps, int numsamples){
+		try (FileOutputStream outFile = new FileOutputStream(new File(outputPath+".grds"));
+			BufferedOutputStream bufferedOut = new BufferedOutputStream(outFile, 8192*16);
+			ObjectOutputStream outObj = new ObjectOutputStream(bufferedOut))
+		{
+			run(steps*10);//warmup
+			for (int i=0; i<numsamples; i++){
+				run(steps);
+				outObj.reset();
+				outObj.writeObject(gDiagram);
+			}
+			bufferedOut.flush();
+		}catch (IOException e){
+			System.err.println(e);
+			System.exit(1);
+		}
+	}
+
 	private void run(int steps){
 		int movetype;
 		int vertex;
@@ -256,7 +275,6 @@ public class WangLandau {
 								if (gDiagram.isCommuteColValid(vertex/2) && calcAndCheckProbability(movetype, new int[]{vertex/2, GridDiagram.MOVE_SUBTYPE_COLUMN})) {
 									gDiagram.commuteCol(vertex/2);
 									updateCurrentEnergyFromNext();
-
 								}
 							}
 							break;
