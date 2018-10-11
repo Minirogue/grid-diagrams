@@ -45,6 +45,10 @@ class Energy implements Serializable {
         isHashCached = false;
     }
 
+    public Energy(Serializable[] currentState){
+        energyStates = currentState;
+    }
+
     public Serializable[] getEnergyState(){
         return energyStates;
     }
