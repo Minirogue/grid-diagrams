@@ -1,6 +1,9 @@
 //package grid_tools;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.io.FileWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -22,6 +25,8 @@ public class WangLandau {
 	private HashMap<Energy, Double> weights;
 	private String saveFile;
 	private double defaultWeight = 0.0;
+	private boolean makeMovie = false;
+	private int histThreshold = Integer.MAX_VALUE;
 
 
 	public WangLandau(String knotName, int[] initEnergyType){
@@ -37,6 +42,9 @@ public class WangLandau {
 	public void setWeightsSaveFile(String filename){ saveFile = filename; }
 	public void setUpperSize(int newbound){ upperSize = newbound; }
 	public void setLowerSize(int newbound){ lowerSize = newbound; }
+	public void setHistThreshold(int newthreshold){
+		histThreshold = newthreshold;
+	}
 
 	public HashMap<Energy, Double> getWeights(){ return weights; }
 	public void setDefaultWeightToMax(){
@@ -48,6 +56,9 @@ public class WangLandau {
 		}
 	}
 
+	public void setMakeMovie(boolean newval){
+		makeMovie = newval;
+	}
 	public boolean loadWeightsFromFile(String filename){
 		try{
 			FileInputStream inFile = new FileInputStream(new File(filename));
@@ -71,7 +82,7 @@ public class WangLandau {
 	private boolean saveWeightsToFile(){
 		if (saveFile != null){
 			try{
-				FileOutputStream outFile = new FileOutputStream(new File(saveFile));
+				FileOutputStream outFile = new FileOutputStream(new File(saveFile+".ser"));
 				ObjectOutputStream outObj = new ObjectOutputStream(outFile);
 				outObj.writeObject(weights);
 				outObj.close();
@@ -86,6 +97,26 @@ public class WangLandau {
 			}
 		}
 		return false;
+	}
+	private void printToMovie(HashMap<Energy, Integer> histogram){//WARNING: this assumes size is energy
+		String weightString = "";
+		String histString = "";
+		try{
+			File weightFile = new File(saveFile+"_weights.txt");
+			File histFile = new File(saveFile+"_histogram.txt");
+			FileWriter weightWriter = new FileWriter(weightFile, true);
+			FileWriter histWriter = new FileWriter(histFile, true);
+			for (int i = lowerSize; i <= upperSize; i++){
+				weightString += weights.getOrDefault(new Energy(new Integer[]{i}),0.0)+" ";
+				histString += histogram.getOrDefault(new Energy(new Integer[]{i}),0)+" ";
+			}
+			weightWriter.write(weightString+"\n");
+			histWriter.write(histString+"\n");
+			weightWriter.close();
+			histWriter.close();
+		}catch(IOException e){
+			System.out.println(e);
+		}
 	}
 	public GridDiagram getGridDiagram(){ return gDiagram; }
 	public void updateCurrentEnergyFromNext(){
@@ -120,12 +151,27 @@ public class WangLandau {
 		return Math.log(Math.random()) < prob;
 	}
 
+	private void clearHistogram(HashMap<Energy, Integer> histogram){
+		for (Energy key : weights.keySet()){
+			histogram.put(key, 0);
+		}
+	}
 
 	public void train(int steps, int flatCheckFreq, double fStart, double fFinal, double fModFactor){
 		HashMap<Energy, Integer> histogram = new HashMap<>();
+		boolean isFirstF = true;
 		double fCurrent = fStart;
 		double currentWeight;//currentMaxWeight, currentMinWeight, 
 		int currentMinHistogram, currentMaxHistogram;
+		if (makeMovie){
+			try{
+				Files.deleteIfExists(Paths.get(saveFile+"_weights.txt"));
+				Files.deleteIfExists(Paths.get(saveFile+"_histogram.txt"));
+			}catch (IOException e){
+				System.out.println(e);
+			}
+
+		}
 		/*currentMinWeight = Integer.MAX_VALUE;
 		currentMaxWeight = Integer.MIN_VALUE;
 		for (HashMap.Entry<Energy, Double> entry : weights.entrySet()){
@@ -138,9 +184,7 @@ public class WangLandau {
 				currentMaxWeight = currentWeight;
 			}
 		}*/
-		for (Energy key : weights.keySet()){
-			histogram.put(key, 0);
-		}
+		clearHistogram(histogram);
 		run(steps*10);//warmup
 		while (fCurrent > fFinal){
 			for (int i = 0; i<flatCheckFreq; i++){
@@ -151,6 +195,9 @@ public class WangLandau {
 				}*/
 				weights.put(currentEnergy,currentWeight);
 				histogram.put(currentEnergy, histogram.getOrDefault(currentEnergy,0)+1);
+				if (makeMovie){
+					printToMovie(histogram);
+				}
 			}
 			currentMinHistogram = Collections.min(histogram.values());
 			currentMaxHistogram = Collections.max(histogram.values());//TODO maybe there's a better way to track these
@@ -161,9 +208,14 @@ public class WangLandau {
 				System.out.println("Values "+weights.values());
 				saveWeightsToFile();
 				fCurrent = fCurrent*fModFactor;
-				for (Energy key : histogram.keySet()){
-					histogram.put(key, 0);
-				}
+				isFirstF = false;
+				clearHistogram(histogram);
+			}else if (isFirstF && currentMaxHistogram > histThreshold){
+				System.out.println("Threshold reached, resetting histogram and saving weights");
+				System.out.println("Keys "+weights.keySet());
+				System.out.println("Values "+weights.values());
+				saveWeightsToFile();
+				clearHistogram(histogram);
 			}
 		}
 		System.out.println("Final Weights: ");
