@@ -66,12 +66,12 @@ public class GridDiagram implements Serializable {
             cols = diagramFromFile.getCols();
             size = diagramFromFile.getSize();
         } catch (FileNotFoundException e){
-            System.out.println("File not found");
+            System.err.println("File not found");
         } catch (IOException e){
             //System.out.println("Error initializing input stream");
-            System.out.println(e);
+            System.err.println(e);
         } catch (ClassNotFoundException e){
-            System.out.println("File not correctly formatted");
+            System.err.println("File not correctly formatted");
         }
     }
 
