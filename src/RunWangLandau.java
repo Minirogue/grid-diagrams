@@ -12,13 +12,17 @@ public class RunWangLandau {
     private static String knotType = "3_1";
     private static int[] energy = new int[0];
     private static String inputWeightsFile;
-    private static String outputWeightsFile;
+    private static String outputFile;
     private static int steps = 10000;
     private static double fStart = 1;
     private static double fFinal = .01;
     private static double fChange = .5;
     private static int flatCheckFrequency = 20;
     private static boolean isTraining = false;
+    private static boolean isSampling = false;
+    private static boolean isMakeMovie = false;
+    private static int histThreshold = Integer.MAX_VALUE;
+    private static int numSamples = 10000;
 
     public static void main(String[] args){
         parseArgs(args);
@@ -29,12 +33,30 @@ public class RunWangLandau {
             wl.loadWeightsFromFile(inputWeightsFile);
             wl.setDefaultWeightToMax();
         }
-        if (outputWeightsFile != null){
-            wl.setWeightsSaveFile(outputWeightsFile+".ser");
-        }
-
+        
         printLogFile();
-        wl.train(steps, flatCheckFrequency, fStart, fFinal, fChange);
+        if (isTraining){
+        	if (outputFile != null){
+            	wl.setWeightsSaveFile(outputFile);
+        	} 
+        	wl.setMakeMovie(isMakeMovie);
+        	wl.setHistThreshold(histThreshold);
+        	wl.train(steps, flatCheckFrequency, fStart, fFinal, fChange);
+        }
+        else  if (isSampling){
+        	if (outputFile == null){
+        		System.err.println("output file not specified");
+        		System.exit(1);
+        	}
+        	wl.run(steps*10);
+        	for (int i=0; i<numSamples; i++){
+        		wl.run(steps);
+        		//TODO save to file
+        	}
+        }
+        else {
+        	System.out.println("No mode selected. Use either --training or --sampling option.")
+        }
     }
 
     private static void parseArgs(String[] args){
@@ -60,7 +82,7 @@ public class RunWangLandau {
                     break;
                 case "-o":
                 case "--output-weights":
-                    outputWeightsFile = args[i+1];
+                    outputFile = args[i+1];
                     i++;
                     break;
                 case "-M":
@@ -99,11 +121,23 @@ public class RunWangLandau {
                     i++;
                     break;
                 case "-t":
-                case "--train":
+                case "--training":
                     isTraining = true;
+                    break;
+                case "--sampling":
+                	isSampling = true;
+                	break;
+                case "-T":
+                case "--threshold":
+                	histThreshold = Integer.valueOf(args[i+1]);
+                	i++;
+                	break;
+                case "--movie":
+                    isMakeMovie = true;
                     break;
                 default:
                     System.out.println("Unknown argument: "+args[i]);
+                    break;
             }//TODO make sure options have good designators
         }
     }
@@ -151,6 +185,8 @@ public class RunWangLandau {
             writer.println("Until modification factor is less than e^"+fFinal);
             writer.println("Checking for flatness every "+flatCheckFrequency+" samples");
             writer.println("Training = "+isTraining);
+            writer.println("Histogram threshold = "+histThreshold);
+            writer.println("outputting to movie? "+isMakeMovie);
             writer.close();
         }catch (FileNotFoundException e){
             System.out.println(e);
