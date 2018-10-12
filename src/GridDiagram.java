@@ -506,6 +506,18 @@ public class GridDiagram implements Serializable {
         return 0;
     }
 
+    public int[][] getSavableGrid(){
+    	int[] xCol = new int[getSize()];
+    	int[] oCol = new int[getSize()];
+    	Column thisCol;
+    	for (int i=0; i< getSize(); i++){
+    		thisCol = cols.get(i);
+    		xCol[i] = thisCol.getXRow();
+    		oCol[i] = thisCol.getORow();
+    	}
+    	return new int[][]{xCol, oCol};
+    }
+
     //[rowcol, roworcol]
     private int commuteDeltaWrithe(int[] arguments){
         int delta = 0;
