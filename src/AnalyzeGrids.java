@@ -10,6 +10,10 @@ import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.ArrayList;
 
+
+//TODO add options for input/output
+//TODO add options for interpreting data in different ways
+
 public class AnalyzeGrids {
 
 	private static String filePath = "testingsamples";
