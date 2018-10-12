@@ -237,10 +237,11 @@ public class WangLandau {
 			ObjectOutputStream outObj = new ObjectOutputStream(bufferedOut))
 		{
 			run(steps*10);//warmup
+			int[][] savableGrid;
 			for (int i=0; i<numsamples; i++){
 				run(steps);
-				outObj.reset();
-				outObj.writeObject(gDiagram);
+				savableGrid = gDiagram.getSavableGrid();
+				outObj.writeObject(savableGrid);
 			}
 			bufferedOut.flush();
 		}catch (IOException e){
