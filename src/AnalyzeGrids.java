@@ -8,7 +8,10 @@ import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.ArrayList;
+import java.util.Collections;
+
 
 
 //TODO add options for input/output
@@ -16,12 +19,95 @@ import java.util.ArrayList;
 
 public class AnalyzeGrids {
 
-	private static String filePath = "testingsamples";
+	private static final int SIZE_TRAINED_AND_SAMPLED_MODE = 1;
+	private static final int SIZEWRITHE_TRAINED_AND_SAMPLED_MODE = 2;
+
+	private static String inFilePath;
+	private static String outFilePath;
+	private static int mode = -1;
 
 	public static void main(String[] args){
-        filePath = args[0];
+        parseArgs(args);
+		switch (mode){
+			case SIZE_TRAINED_AND_SAMPLED_MODE:
+				splitWrithesToFiles();
+				break;
+			case SIZEWRITHE_TRAINED_AND_SAMPLED_MODE:
+				analyzeSizeWritheWeights();
+				break;
+			default:
+				System.err.println("No valid mode option detected");
+				System.exit(1);
+				break;
+		}
+	}
+
+	private static void analyzeSizeWritheWeights(){
+		HashMap<Energy,Double> weights = null;
+		try (FileInputStream fis = new FileInputStream(inFilePath+".wts");
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            ObjectInputStream ois = new ObjectInputStream(bis))
+        {
+        	weights = (HashMap<Energy, Double>)ois.readObject();
+        }catch (EOFException e){
+        	System.err.println(e);
+        	System.err.println("No data in file?");
+        }
+        catch (ClassNotFoundException e){
+            System.err.println(e);
+        }
+        catch (IOException e){
+            System.err.println(e);
+        }
+        if (weights != null){
+        	HashMap<Integer, ArrayList<Double>> sizeToWrithes = new HashMap();
+        	HashMap<Integer, ArrayList<Double>> sizeToWeights = new HashMap();
+        	Energy thisEnergy;
+        	Double thisWeight;
+        	int thisSize;
+        	double thisWrithe;
+        	ArrayList<Double> writheAL;
+        	ArrayList<Double> weightAL;
+        	for (Map.Entry<Energy, Double> entry : weights.entrySet()){
+        		thisEnergy = entry.getKey();
+        		thisSize = (int)thisEnergy.getEnergyState()[0];
+        		thisWrithe = (int)thisEnergy.getEnergyState()[1];
+        		thisWeight = (Double)entry.getValue();
+        		if (sizeToWrithes.containsKey(thisSize)){
+        			writheAL = sizeToWrithes.get(thisSize);
+        			weightAL = sizeToWeights.get(thisSize);
+        		}else{
+        			writheAL = new ArrayList<Double>();
+        			weightAL = new ArrayList<Double>();
+        			sizeToWrithes.put(thisSize, writheAL);
+        			sizeToWeights.put(thisSize, weightAL);
+        		}
+        		weightAL.add(thisWeight);
+        		writheAL.add(thisWrithe);
+        	}
+        	for (int currSize : sizeToWeights.keySet()){
+        		writheAL = sizeToWrithes.get(currSize);
+        		weightAL = sizeToWeights.get(currSize);
+   				double reduction_value = Collections.min(weightAL);
+   				double sum = 0;
+   				double count = 0;
+   				//System.out.println(writheAL);
+   				//System.out.println(weightAL);
+   				for (int i = 0; i<writheAL.size(); i++){
+   					thisWeight = weightAL.get(i);
+   					thisWrithe = writheAL.get(i);
+   					sum += Math.exp(thisWeight-reduction_value)*thisWrithe;
+   					count += Math.exp(thisWeight-reduction_value);
+   				}
+
+   				System.out.println("Size "+currSize+" has average writhe of "+(sum/count));
+        	}
+        }
+	}
+
+	private static void splitWrithesToFiles(){
 		HashMap<Integer, ArrayList<Integer>> fullData = new HashMap();
-		try (FileInputStream fis = new FileInputStream(filePath+".grds");
+		try (FileInputStream fis = new FileInputStream(inFilePath+".grds");
             BufferedInputStream bis = new BufferedInputStream(fis);
             ObjectInputStream ois = new ObjectInputStream(bis))
         {
@@ -53,7 +139,7 @@ public class AnalyzeGrids {
         //System.out.println(fullData);
         for (int size : fullData.keySet()){
         	//System.out.println("Writhe average for "+size+": ");
-        	try(FileWriter fw = new FileWriter(filePath+"_"+size+".txt");
+        	try(FileWriter fw = new FileWriter(outFilePath+"_"+size+".txt");
         		BufferedWriter bw = new BufferedWriter(fw)){
 	        	for (Integer wr : fullData.get(size)){
 	        		bw.write(wr+"\n");
@@ -65,4 +151,30 @@ public class AnalyzeGrids {
         	//System.out.println(fullData.get(size));
         }
 	}
+
+	private static void parseArgs(String[] args){
+        for (int i=0; i<args.length; i++){
+            switch (args[i]){
+                case "-i":
+                case "--input-path":
+                    inFilePath = args[i+1];
+                    i++;
+                    break;
+                case "-o":
+                case "--output-path":
+                    outFilePath = args[i+1];
+                    i++;
+                    break;
+                case "-SW":
+                	mode = SIZEWRITHE_TRAINED_AND_SAMPLED_MODE;
+                	break;
+                case "-S":
+                	mode = SIZE_TRAINED_AND_SAMPLED_MODE;
+                	break;
+                default:
+                    System.out.println("Unknown argument: "+args[i]);
+                    break;
+            }//TODO make sure options have good designators
+        }
+    }
 }
