@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.BufferedInputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -28,7 +29,7 @@ public class testingCode {
         wl.loadWeightsFromFile("testWeights.ser");
         System.out.println(wl.getWeights().values());
         */
-
+        /*
         HashMap<Energy, Double> weights = new HashMap<>();
         try{
             FileInputStream inFile = new FileInputStream(new File("testingfile.ser"));
@@ -57,6 +58,8 @@ public class testingCode {
         }
         System.out.println(weights.containsKey(e));
         System.out.println(weights.get(e));
+        */
+        
     }
 
 }
