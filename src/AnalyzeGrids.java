@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.io.Serializable;
 
 
 
@@ -21,6 +22,8 @@ public class AnalyzeGrids {
 
 	private static final int SIZE_TRAINED_AND_SAMPLED_MODE = 1;
 	private static final int SIZEWRITHE_TRAINED_AND_SAMPLED_MODE = 2;
+    private static final int SIZE_WEIGHTS = 3;
+    private static final int WEIGHTS_TO_PARSE = 4;
 
 	private static String inFilePath;
 	private static String outFilePath;
@@ -30,17 +33,80 @@ public class AnalyzeGrids {
         parseArgs(args);
 		switch (mode){
 			case SIZE_TRAINED_AND_SAMPLED_MODE:
-				splitWrithesToFiles();
+				parseWrithesOfSamples();
 				break;
 			case SIZEWRITHE_TRAINED_AND_SAMPLED_MODE:
 				analyzeSizeWritheWeights();
 				break;
+            case SIZE_WEIGHTS:
+                printSizeWeights();
+                break;
+            case WEIGHTS_TO_PARSE:
+                weightsToParse();
+                break;
 			default:
 				System.err.println("No valid mode option detected");
 				System.exit(1);
 				break;
 		}
 	}
+
+    private static void weightsToParse(){
+        boolean sizeNormed = false;//to norm each size
+        HashMap<Energy, Double> weights = new HashMap();
+        try (FileInputStream fis = new FileInputStream(inFilePath+".wts");
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            ObjectInputStream ois = new ObjectInputStream(bis))
+        {
+            weights = (HashMap<Energy, Double>)ois.readObject();
+            HashMap<Integer, Double> minWeightOfSize = new HashMap();
+            if (sizeNormed){
+                for (Map.Entry<Energy, Double> entry : weights.entrySet()){
+                    if (entry.getValue() < minWeightOfSize.getOrDefault((int)entry.getKey().getEnergyState()[0],Double.MAX_VALUE)){
+                        minWeightOfSize.put((int)entry.getKey().getEnergyState()[0], entry.getValue());
+                    }
+                }
+            }
+            String thisData;
+            for (Map.Entry<Energy, Double> entry : weights.entrySet()){
+                    thisData = "";
+                    for (Serializable s : entry.getKey().getEnergyState()){
+                        thisData += s.toString()+" ";
+                    }
+                    thisData += (entry.getValue()-minWeightOfSize.getOrDefault((int)entry.getKey().getEnergyState()[0],0.0));
+                   System.out.println(thisData);
+                }
+        }catch (EOFException e){
+            //We need to reach the end of the file. There doesn't seem to be a better way to deal with this.
+        }
+        catch (ClassNotFoundException e){
+            System.err.println(e);
+        }
+        catch (IOException e){
+            System.err.println(e);
+        }
+    }
+
+    private static void printSizeWeights(){
+        HashMap<Energy, Double> weights = new HashMap();
+        try (FileInputStream fis = new FileInputStream(inFilePath+".ser");
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            ObjectInputStream ois = new ObjectInputStream(bis))
+        {
+            weights = (HashMap<Energy, Double>)ois.readObject();
+            for (Map.Entry<Energy, Double> entry : weights.entrySet()){
+               System.out.println(entry.getKey().getEnergyState()[0]+" "+entry.getValue());
+            }
+        }catch (EOFException e){
+            //We need to reach the end of the file. There doesn't seem to be a better way to deal with this.
+        }
+        catch (ClassNotFoundException e){
+            System.err.println(e);
+        }
+        catch (IOException e){
+            System.err.println(e);
+        }
+    }
 
 	private static void analyzeSizeWritheWeights(){
 		HashMap<Energy,Double> weights = null;
@@ -100,7 +166,7 @@ public class AnalyzeGrids {
    					count += Math.exp(thisWeight-reduction_value);
    				}
 
-   				System.out.println("Size "+currSize+" has average writhe of "+(sum/count));
+   				System.out.println(currSize+" "+(sum/count));
         	}
         }
 	}
@@ -152,6 +218,31 @@ public class AnalyzeGrids {
         }
 	}
 
+    private static void parseWrithesOfSamples(){
+        try (FileInputStream fis = new FileInputStream(inFilePath+".grds");
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            ObjectInputStream ois = new ObjectInputStream(bis))
+        {
+            int[][] savableGrid;
+            GridDiagram gd;
+            ArrayList<Integer> currentAL;
+            int size;
+            while(true){
+                savableGrid = (int[][])ois.readObject();
+                gd = new GridDiagram(savableGrid[0], savableGrid[1]);
+                System.out.println(gd.getSize()+" "+gd.calcWrithe());
+            }
+        }catch (EOFException e){
+            //We need to reach the end of the file. There doesn't seem to be a better way to deal with this.
+        }
+        catch (ClassNotFoundException e){
+            System.err.println(e);
+        }
+        catch (IOException e){
+            System.err.println(e);
+        }
+    }
+
 	private static void parseArgs(String[] args){
         for (int i=0; i<args.length; i++){
             switch (args[i]){
@@ -171,6 +262,12 @@ public class AnalyzeGrids {
                 case "-S":
                 	mode = SIZE_TRAINED_AND_SAMPLED_MODE;
                 	break;
+                case "-Swts":
+                    mode = SIZE_WEIGHTS;
+                    break;
+                case "--make-weights-parseable":
+                    mode = WEIGHTS_TO_PARSE;
+                    break;
                 default:
                     System.out.println("Unknown argument: "+args[i]);
                     break;
