@@ -164,6 +164,7 @@ public class WangLandau {
 		double fCurrent = fStart;
 		double currentWeight;//currentMaxWeight, currentMinWeight, 
 		int currentMinHistogram, currentMaxHistogram;
+		double stopThreshold = 1/Math.sqrt(fCurrent);
 		if (makeMovie){
 			try{
 				Files.deleteIfExists(Paths.get(outputPath+"_weights.txt"));
@@ -173,21 +174,10 @@ public class WangLandau {
 			}
 
 		}
-		/*currentMinWeight = Integer.MAX_VALUE;
-		currentMaxWeight = Integer.MIN_VALUE;
-		for (HashMap.Entry<Energy, Double> entry : weights.entrySet()){
-			histogram.put(entry.getKey(), 0);
-			currentWeight = entry.getValue();
-			if (currentWeight < currentMinWeight){
-				currentMinWeight = currentWeight;
-			}
-			else if (currentMaxWeight < currentWeight){
-				currentMaxWeight = currentWeight;
-			}
-		}*/
-		clearHistogram(histogram);
-		run(steps*10);//warmup
-		while (fCurrent > fFinal){
+		clearHistogram(histogram);//initialize histogram with all known energy states
+		histogram.put(currentEnergy, 0);//initialize histogram entry for starting state. This is to help with the stopping condition.
+		//run(steps*10);//warmup
+		while (fCurrent >= fFinal){
 			for (int i = 0; i<flatCheckFreq; i++){
 				run(steps);
 				currentWeight = weights.getOrDefault(currentEnergy, defaultWeight)+fCurrent;//TODO could the 0 here be replaced with some function of the existing weights?
@@ -201,27 +191,22 @@ public class WangLandau {
 				}
 			}
 			currentMinHistogram = Collections.min(histogram.values());
-			currentMaxHistogram = Collections.max(histogram.values());//TODO maybe there's a better way to track these
-			if (currentMinHistogram > .8*currentMaxHistogram){
+			//currentMaxHistogram = Collections.max(histogram.values());
+			if (currentMinHistogram > stopThreshold+(isFirstF ? 10 : 0)){
 				normalizeWeights();
-				System.out.println("Saving weights");
-				System.out.println("Keys "+weights.keySet());
-				System.out.println("Values "+weights.values());
+				System.out.println("Passed with f=exp("+fCurrent+") and stopping threshold "+stopThreshold+((isFirstF ? " + 10." : ".")));
+				System.out.println("Saving weights:");
+				System.out.println(""+weights.entrySet());
 				saveWeightsToFile();
 				fCurrent = fCurrent*fModFactor;
+				stopThreshold = 1/Math.sqrt(fCurrent);
 				isFirstF = false;
 				clearHistogram(histogram);
-			}else if (isFirstF && currentMaxHistogram > histThreshold){
-				System.out.println("Threshold reached, resetting histogram and saving weights");
-				System.out.println("Keys "+weights.keySet());
-				System.out.println("Values "+weights.values());
-				saveWeightsToFile();
-				clearHistogram(histogram);
+				System.out.println("Now running with f=exp("+fCurrent+") and stopping threshold "+stopThreshold);
 			}
 		}
 		System.out.println("Final Weights: ");
-		System.out.println(weights.keySet());
-		System.out.println(weights.values());
+		System.out.println(weights.entrySet());
 	}
 
 	private void normalizeWeights(){
