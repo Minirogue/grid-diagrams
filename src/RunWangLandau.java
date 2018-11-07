@@ -73,7 +73,7 @@ public class RunWangLandau {
                     break;
                 case "-i":
                 case "--input-weights":
-                    inputWeightsFile = args[i+1];
+                    inputWeightsFile = args[i+1]+".wts";
                     i++;
                     break;
                 case "-o":
