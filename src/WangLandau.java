@@ -69,7 +69,7 @@ public class WangLandau {
 			inFile.close();
 			return true;
 		} catch (FileNotFoundException e){
-			System.out.println("File not found");
+			System.out.println(e);
 			return false;
 		} catch (IOException e){
 			//System.out.println("Error initializing input stream");
