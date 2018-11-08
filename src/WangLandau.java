@@ -13,6 +13,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Random;
 
 public class WangLandau {
 
@@ -28,6 +29,7 @@ public class WangLandau {
 	private double defaultWeight = 0.0;
 	private boolean makeMovie = false;
 	private int histThreshold = Integer.MAX_VALUE;
+	private Random rand = new Random();
 
 
 	public WangLandau(String knotName, int[] initEnergyType){
@@ -45,6 +47,9 @@ public class WangLandau {
 	public void setLowerSize(int newbound){ lowerSize = newbound; }
 	public void setHistThreshold(int newthreshold){
 		histThreshold = newthreshold;
+	}
+	public void setRandomSeed(long newSeed){
+		rand.setSeed(newSeed);
 	}
 
 	public HashMap<Energy, Double> getWeights(){ return weights; }
@@ -149,7 +154,7 @@ public class WangLandau {
 				System.out.println("Error with calculateProbabilityOfMove: moveType not valid");
 				System.exit(1);
 		}
-		return Math.log(Math.random()) < prob;
+		return Math.log(rand.nextDouble()) < prob;
 	}
 
 	private void clearHistogram(HashMap<Energy, Integer> histogram){
@@ -194,7 +199,7 @@ public class WangLandau {
 			//currentMaxHistogram = Collections.max(histogram.values());
 			if (currentMinHistogram > stopThreshold){//+(isFirstF ? 10 : 0)){
 				normalizeWeights();
-				System.out.println("Passed with f=exp("+fCurrent+") and stopping threshold ");//+stopThreshold+((isFirstF ? " + 10." : ".")));
+				System.out.println("Passed with f=exp("+fCurrent+") and stopping threshold "+stopThreshold);//+((isFirstF ? " + 10." : ".")));
 				System.out.println("Saving weights:");
 				System.out.println(""+weights.entrySet());
 				saveWeightsToFile();
@@ -242,15 +247,15 @@ public class WangLandau {
 		int insertedVertex;
 			for (int i = 0; i<steps; i++){
 				//TODO implement energies for translations
-				/*if (Math.random() < 0.01){
-					movetype = (int)(Math.random()*gDiagram.getSize()*gDiagram.getSize());
+				/*if (rand.nextDouble() < 0.01){
+					movetype = (int)(rand.nextDouble()*gDiagram.getSize()*gDiagram.getSize());
 					gDiagram.translate(movetype%gDiagram.getSize(), movetype/gDiagram.getSize());
 				}*/
 				//else{
-					movetype = (int)(Math.random()*(3));
+					movetype = (int)(rand.nextDouble()*(3));
 					switch (movetype){
 						case GridDiagram.MOVETYPE_COMMUTATION:
-							vertex = (int)(Math.random()*gDiagram.getSize()*2);
+							vertex = (int)(rand.nextDouble()*gDiagram.getSize()*2);
 							if (vertex%2 == 0){
 								if (gDiagram.isCommuteRowValid(vertex/2) && calcAndCheckProbability(movetype, new int[]{vertex/2, GridDiagram.MOVE_SUBTYPE_ROW})) {
 									gDiagram.commuteRow(vertex/2);
@@ -266,7 +271,7 @@ public class WangLandau {
 							break;
 						case GridDiagram.MOVETYPE_DESTABILIZATION:
 								if (gDiagram.getSize() > lowerSize) {
-									vertex = (int) (Math.random() * gDiagram.getSize() * 2);
+									vertex = (int) (rand.nextDouble() * gDiagram.getSize() * 2);
 									moveSubtype = vertex % 2;
 									vertex = vertex / 2;
 									switch (moveSubtype) {
@@ -292,10 +297,10 @@ public class WangLandau {
 							break;
 						case GridDiagram.MOVETYPE_STABILIZATION:
 							if (gDiagram.getSize() < upperSize) {
-								vertex = (int) (Math.random() * gDiagram.getSize() * 4);
+								vertex = (int) (rand.nextDouble() * gDiagram.getSize() * 4);
 								moveSubtype = vertex % 4;
 								vertex = vertex / 4;
-								insertedVertex = (int) (Math.random() * (gDiagram.getSize() + 1));
+								insertedVertex = (int) (rand.nextDouble() * (gDiagram.getSize() + 1));
 								if (calcAndCheckProbability(movetype, new int[]{vertex, insertedVertex, moveSubtype})) {
 									switch (moveSubtype) {
 										case GridDiagram.INSERT_XO_COLUMN:
