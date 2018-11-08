@@ -160,7 +160,7 @@ public class WangLandau {
 
 	public void train(int steps, int flatCheckFreq, double fStart, double fFinal, double fModFactor){
 		HashMap<Energy, Integer> histogram = new HashMap<>();
-		boolean isFirstF = true;
+		//boolean isFirstF = true;
 		double fCurrent = fStart;
 		double currentWeight;//currentMaxWeight, currentMinWeight, 
 		int currentMinHistogram, currentMaxHistogram;
@@ -192,15 +192,15 @@ public class WangLandau {
 			}
 			currentMinHistogram = Collections.min(histogram.values());
 			//currentMaxHistogram = Collections.max(histogram.values());
-			if (currentMinHistogram > stopThreshold+(isFirstF ? 10 : 0)){
+			if (currentMinHistogram > stopThreshold){//+(isFirstF ? 10 : 0)){
 				normalizeWeights();
-				System.out.println("Passed with f=exp("+fCurrent+") and stopping threshold "+stopThreshold+((isFirstF ? " + 10." : ".")));
+				System.out.println("Passed with f=exp("+fCurrent+") and stopping threshold ");//+stopThreshold+((isFirstF ? " + 10." : ".")));
 				System.out.println("Saving weights:");
 				System.out.println(""+weights.entrySet());
 				saveWeightsToFile();
 				fCurrent = fCurrent*fModFactor;
 				stopThreshold = 1/Math.sqrt(fCurrent);
-				isFirstF = false;
+				//isFirstF = false;
 				clearHistogram(histogram);
 				System.out.println("Now running with f=exp("+fCurrent+") and stopping threshold "+stopThreshold);
 			}
