@@ -23,6 +23,7 @@ public class RunWangLandau {
     private static boolean isMakeMovie = false;
     private static int histThreshold = Integer.MAX_VALUE;
     private static int numSamples = 10000;
+    private static long seed = 1;
 
     public static void main(String[] args){
         parseArgs(args);
@@ -38,6 +39,8 @@ public class RunWangLandau {
     		System.exit(1);
     	}else{
         	wl.setOutputPath(outputFilePath);
+            seed = System.currentTimeMillis()*outputFilePath.hashCode();
+            wl.setRandomSeed(seed);
         }
         if (isTraining){
         	wl.setMakeMovie(isMakeMovie);
@@ -172,6 +175,7 @@ public class RunWangLandau {
         try{
             PrintWriter writer = new PrintWriter(outputFilePath+".log", "UTF-8");
             writer.println("Training Wang-Landau for "+knotType+" with the following parameters:");
+            writer.println("Random seed: "+seed);
             writer.println("Minimum size: "+minSize);
             writer.println("Maximum size: "+maxSize);
             writer.println("Energy = "+energyTypeAsString());
@@ -197,6 +201,7 @@ public class RunWangLandau {
     	try{
             PrintWriter writer = new PrintWriter(outputFilePath+".log", "UTF-8");
             writer.println("Sampling Wang-Landau for "+knotType+" with the following parameters:");
+            writer.println("Random seed: "+seed);
             writer.println("Minimum size: "+minSize);
             writer.println("Maximum size: "+maxSize);
             writer.println("Energy = "+energyTypeAsString());
