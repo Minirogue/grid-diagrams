@@ -143,7 +143,7 @@ public class AnalyzeGrids {
 
     private static void printSizeWeights(){
         HashMap<Energy, Double> weights = new HashMap();
-        try (FileInputStream fis = new FileInputStream(inFilePath+".ser");
+        try (FileInputStream fis = new FileInputStream(inFilePath+".wts");
             BufferedInputStream bis = new BufferedInputStream(fis);
             ObjectInputStream ois = new ObjectInputStream(bis))
         {
