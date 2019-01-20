@@ -24,6 +24,7 @@ public class AnalyzeGrids {
 	private static final int SIZEWRITHE_TRAINED_AND_SAMPLED_MODE = 2;
     private static final int SIZE_WEIGHTS = 3;
     private static final int WEIGHTS_TO_PARSE = 4;
+    private static final int AVERAGE_30_WEIGHTS = 5;
 
 	private static String inFilePath;
 	private static String outFilePath;
@@ -44,12 +45,65 @@ public class AnalyzeGrids {
             case WEIGHTS_TO_PARSE:
                 weightsToParse();
                 break;
+            case AVERAGE_30_WEIGHTS:
+            	average30Weights();
+            	break;
 			default:
 				System.err.println("No valid mode option detected");
 				System.exit(1);
 				break;
 		}
 	}
+
+	private static void average30Weights(){
+		HashMap<Energy, ArrayList<Double>> allinfo = new HashMap();
+        ArrayList thisArrayList;
+        String currentfilename;
+        HashMap<Energy, Double> theseWeights;
+        for (int i = 1; i<=30; i++){
+            currentfilename = inFilePath+"_"+i+".wts";
+            try (FileInputStream fis = new FileInputStream(currentfilename);
+                BufferedInputStream bis = new BufferedInputStream(fis);
+                ObjectInputStream ois = new ObjectInputStream(bis))
+            {
+                theseWeights = (HashMap<Energy, Double>)ois.readObject();
+                for (Energy thisEnergy : theseWeights.keySet()){
+                    thisArrayList = allinfo.getOrDefault(thisEnergy, new ArrayList());
+                    thisArrayList.add(theseWeights.get(thisEnergy));
+                    allinfo.put(thisEnergy, thisArrayList);
+                }
+            }catch (EOFException e){
+                //We need to reach the end of the file. There doesn't seem to be a better way to deal with this.
+            }
+            catch (ClassNotFoundException e){
+                System.err.println(e);
+            }
+            catch (IOException e){
+                System.err.println(e);
+            }
+        }
+        for (Map.Entry<Energy, ArrayList<Double>> entry : allinfo.entrySet()){
+            printAverageInfo(entry.getKey(), entry.getValue());
+        }
+	}
+
+    private static void printAverageInfo(Energy en, ArrayList<Double> weights){
+        double sum = 0;
+        for (double w : weights){
+            sum += w;
+        }
+        double mean = sum/weights.size();
+        double std = 0;
+        for (double w : weights){
+            std += Math.pow((w-mean), 2);
+        }
+        std = Math.sqrt(std/weights.size());
+        double ciLower = mean - 1.96*std/Math.sqrt(weights.size());
+        double ciUpper = mean + 1.96*std/Math.sqrt(weights.size());
+        double maxdistance = (Double)Collections.max(weights) - (Double)Collections.min(weights);
+        //System.out.println("For energy "+en+" CI = ("+ciLower+", "+ciUpper+") CI width = "+(ciUpper-ciLower)+" range: "+maxdistance);
+        System.out.println(en.getEnergyState()[0]+" "+mean+" "+ciLower+" "+ciUpper);
+    }
 
     private static void weightsToParse(){
         boolean sizeNormed = false;//to norm each size
@@ -267,6 +321,9 @@ public class AnalyzeGrids {
                     break;
                 case "--make-weights-parseable":
                     mode = WEIGHTS_TO_PARSE;
+                    break;
+                case "--average-30-weights":
+                    mode = AVERAGE_30_WEIGHTS;
                     break;
                 default:
                     System.out.println("Unknown argument: "+args[i]);
