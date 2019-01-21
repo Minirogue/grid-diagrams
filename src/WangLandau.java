@@ -18,18 +18,18 @@ import java.util.Random;
 public class WangLandau {
 
 
-	private GridDiagram gDiagram;
+	protected GridDiagram gDiagram;
 	//private int mode; use if this is merged with regular grid algorithm
-	private int upperSize;
-	private int lowerSize;
-	private Energy currentEnergy;
-	private Energy nextEnergy;
-	private HashMap<Energy, Double> weights;
-	private String outputPath;
-	private double defaultWeight = 0.0;
-	private boolean makeMovie = false;
-	private int histThreshold = Integer.MAX_VALUE;
-	private Random rand = new Random();
+	protected int upperSize;
+	protected int lowerSize;
+	protected Energy currentEnergy;
+	protected Energy nextEnergy;
+	protected HashMap<Energy, Double> weights;
+	protected String outputPath;
+	protected double defaultWeight = 0.0;
+	protected boolean makeMovie = false;
+	protected int histThreshold = Integer.MAX_VALUE;
+	protected Random rand = new Random();
 
 
 	public WangLandau(String knotName, int[] initEnergyType){
@@ -85,7 +85,7 @@ public class WangLandau {
 		}
 		return false;
 	}
-	private boolean saveWeightsToFile(){
+	protected boolean saveWeightsToFile(){
 		if (outputPath != null){
 			try{
 				FileOutputStream outFile = new FileOutputStream(new File(outputPath+".wts"));
@@ -104,7 +104,7 @@ public class WangLandau {
 		}
 		return false;
 	}
-	private void printToMovie(HashMap<Energy, Integer> histogram){//WARNING: this assumes size is energy
+	protected void printToMovie(HashMap<Energy, Integer> histogram){//WARNING: this assumes size is energy
 		String weightString = "";
 		String histString = "";
 		try{
@@ -157,7 +157,7 @@ public class WangLandau {
 		return Math.log(rand.nextDouble()) < prob;
 	}
 
-	private void clearHistogram(HashMap<Energy, Integer> histogram){
+	protected void clearHistogram(HashMap<Energy, Integer> histogram){
 		for (Energy key : weights.keySet()){
 			histogram.put(key, 0);
 		}
@@ -214,7 +214,7 @@ public class WangLandau {
 		System.out.println(weights.entrySet());
 	}
 
-	private void normalizeWeights(){
+	protected void normalizeWeights(){
 		double reduction_value = Collections.min(weights.values())-1;
 		for (Energy key : weights.keySet()){
 			weights.put(key, weights.get(key)-reduction_value);
@@ -240,7 +240,7 @@ public class WangLandau {
 		}
 	}
 
-	private void run(int steps){
+	protected void run(int steps){
 		int movetype;
 		int vertex;
 		int moveSubtype;
