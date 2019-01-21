@@ -447,7 +447,7 @@ public class GridDiagram implements Serializable {
     }    
 
     private int destabilizeDeltaWrithe(int[] arguments){
-        if (arguments[2] == MOVE_SUBTYPE_ROW){
+        if (arguments[1] == MOVE_SUBTYPE_ROW){
             Row thisRow;
             thisRow = rows.get(arguments[0]);
             Column xcol = cols.get(thisRow.getXCol());
@@ -475,7 +475,7 @@ public class GridDiagram implements Serializable {
                 }
             }
         }
-        else if (arguments[2] == MOVE_SUBTYPE_COLUMN){
+        else if (arguments[1] == MOVE_SUBTYPE_COLUMN){
             Column thisCol;
             thisCol = cols.get(arguments[1]);
             Row xRow = rows.get(thisCol.getXRow());

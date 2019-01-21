@@ -144,10 +144,10 @@ public class WangLandau {
 				prob = weights.getOrDefault(currentEnergy, 0.0)-weights.getOrDefault(nextEnergy, 0.0);
 				break;
 			case GridDiagram.MOVETYPE_DESTABILIZATION:
-				prob = weights.getOrDefault(currentEnergy, 0.0)-weights.getOrDefault(nextEnergy, 0.0) - Math.log(4*(gDiagram.getSize()-1));
+				prob = weights.getOrDefault(currentEnergy, 0.0)-weights.getOrDefault(nextEnergy, 0.0) - Math.log(2*(gDiagram.getSize()-1));
 				break;
 			case GridDiagram.MOVETYPE_STABILIZATION:
-				prob = weights.getOrDefault(currentEnergy, 0.0)-weights.getOrDefault(nextEnergy, 0.0) + Math.log(4*gDiagram.getSize());
+				prob = weights.getOrDefault(currentEnergy, 0.0)-weights.getOrDefault(nextEnergy, 0.0) + Math.log(2*gDiagram.getSize());
 				break;
 			default:
 				prob = -999999;
@@ -276,22 +276,21 @@ public class WangLandau {
 									vertex = vertex / 2;
 									switch (moveSubtype) {
 										case 0:
-											moveSubtype = gDiagram.getRow(vertex).getXCol();
+											if (gDiagram.isDestabilizeRowValid(vertex)) {
+												if (calcAndCheckProbability(movetype, new int[]{vertex, GridDiagram.MOVE_SUBTYPE_ROW})) {
+													gDiagram.destabilizeRow(vertex);
+													updateCurrentEnergyFromNext();
+												}
+											}
 											break;
 										case 1:
-											moveSubtype = gDiagram.getRow(vertex).getOCol();
+											if (gDiagram.isDestabilizeColValid(moveSubtype)) {
+												if (calcAndCheckProbability(movetype, new int[]{vertex, GridDiagram.MOVE_SUBTYPE_COLUMN})) {
+													gDiagram.destabilizeCol(moveSubtype);
+													updateCurrentEnergyFromNext();
+												}
+											}
 											break;
-									}
-									if (gDiagram.isDestabilizeRowValid(vertex)) {
-										if (calcAndCheckProbability(movetype, new int[]{vertex, moveSubtype, GridDiagram.MOVE_SUBTYPE_ROW})) {
-											gDiagram.destabilizeRow(vertex);
-											updateCurrentEnergyFromNext();
-										}
-									} else if (gDiagram.isDestabilizeColValid(moveSubtype)) {
-										if (calcAndCheckProbability(movetype, new int[]{vertex, moveSubtype, GridDiagram.MOVE_SUBTYPE_COLUMN})) {
-											gDiagram.destabilizeCol(moveSubtype);
-											updateCurrentEnergyFromNext();
-										}
 									}
 								}
 							break;
