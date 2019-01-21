@@ -139,7 +139,7 @@ public class WangLandau {
 	public boolean calcAndCheckProbability(int movetype, int[] arguments){
 		calcAndSetNextEnergy(movetype, arguments);
 		double prob;
-		switch (movetype) {
+		switch (movetype) {//TODO this needs to be reviewed mathematically, as the numbers are not coming out right for the unknot
 			case GridDiagram.MOVETYPE_COMMUTATION:
 				prob = weights.getOrDefault(currentEnergy, 0.0)-weights.getOrDefault(nextEnergy, 0.0);
 				break;
@@ -317,6 +317,10 @@ public class WangLandau {
 									updateCurrentEnergyFromNext();
 								}
 							}
+							break;
+						default:
+							System.err.print("Invalid Grid Move [WangLandau:run()]");
+							System.exit(1);
 							break;
 					}
 				//}
