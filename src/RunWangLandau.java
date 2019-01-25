@@ -24,12 +24,21 @@ public class RunWangLandau {
     private static int histThreshold = Integer.MAX_VALUE;
     private static int numSamples = 10000;
     private static long seed = 1;
+    private static boolean useTVariant = false;
+    private static boolean useGeneralizedStabilizations = true;
 
     public static void main(String[] args){
         parseArgs(args);
-        WangLandau wl = new WangLandau(knotType, energy);
+        WangLandau wl; 
+        if (useTVariant){
+            wl = new WangLandauT(knotType, energy);
+        }
+        else{
+            wl = new WangLandau(knotType, energy);
+        }
         wl.setUpperSize(maxSize);
         wl.setLowerSize(minSize);
+        wl.setGeneralizedStabilizations(useGeneralizedStabilizations);
         if (inputWeightsFile != null){
             wl.loadWeightsFromFile(inputWeightsFile);
             wl.setDefaultWeightToMax();
@@ -136,8 +145,15 @@ public class RunWangLandau {
                 case "--movie":
                     isMakeMovie = true;
                     break;
+                case "--Tvariant":
+                    useTVariant = true;
+                    break;
+                case "--generalized-off":
+                    useGeneralizedStabilizations = false;
+                    break;
                 default:
                     System.out.println("Unknown argument: "+args[i]);
+                    System.exit(1);
                     break;
             }//TODO make sure options have good designators
         }

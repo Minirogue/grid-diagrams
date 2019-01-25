@@ -30,6 +30,7 @@ public class WangLandau {
 	protected boolean makeMovie = false;
 	protected int histThreshold = Integer.MAX_VALUE;
 	protected Random rand = new Random();
+	protected boolean generalizedStabilizations = true;
 
 
 	public WangLandau(String knotName, int[] initEnergyType){
@@ -50,6 +51,9 @@ public class WangLandau {
 	}
 	public void setRandomSeed(long newSeed){
 		rand.setSeed(newSeed);
+	}
+	public void setGeneralizedStabilizations(boolean newval){
+		generalizedStabilizations = newval;
 	}
 
 	public HashMap<Energy, Double> getWeights(){ return weights; }
@@ -139,15 +143,23 @@ public class WangLandau {
 	public boolean calcAndCheckProbability(int movetype, int[] arguments){
 		calcAndSetNextEnergy(movetype, arguments);
 		double prob;
-		switch (movetype) {//TODO this needs to be reviewed mathematically, as the numbers are not coming out right for the unknot
+		switch (movetype) {
 			case GridDiagram.MOVETYPE_COMMUTATION:
 				prob = weights.getOrDefault(currentEnergy, 0.0)-weights.getOrDefault(nextEnergy, 0.0);
 				break;
 			case GridDiagram.MOVETYPE_DESTABILIZATION:
-				prob = weights.getOrDefault(currentEnergy, 0.0)-weights.getOrDefault(nextEnergy, 0.0) - Math.log(2*(gDiagram.getSize()-1));
+				if (generalizedStabilizations){
+					prob = weights.getOrDefault(currentEnergy, 0.0)-weights.getOrDefault(nextEnergy, 0.0) - Math.log(2*(gDiagram.getSize()-1));
+				}else{
+					prob = weights.getOrDefault(currentEnergy, 0.0) - weights.getOrDefault(nextEnergy, 0.0)+Math.log(gDiagram.getSize())-Math.log(4*(gDiagram.getSize()-1));
+				}
 				break;
 			case GridDiagram.MOVETYPE_STABILIZATION:
-				prob = weights.getOrDefault(currentEnergy, 0.0)-weights.getOrDefault(nextEnergy, 0.0) + Math.log(2*gDiagram.getSize());
+				if (generalizedStabilizations){
+					prob = weights.getOrDefault(currentEnergy, 0.0)-weights.getOrDefault(nextEnergy, 0.0) + Math.log(2*gDiagram.getSize());
+				}else{
+					prob = weights.getOrDefault(currentEnergy, 0.0)-weights.getOrDefault(nextEnergy, 0.0)+Math.log(4*gDiagram.getSize())-Math.log(gDiagram.getSize()+1);
+				}
 				break;
 			default:
 				prob = -999999;
@@ -270,50 +282,82 @@ public class WangLandau {
 							}
 							break;
 						case GridDiagram.MOVETYPE_DESTABILIZATION:
-								if (gDiagram.getSize() > lowerSize) {
-									vertex = (int) (rand.nextDouble() * gDiagram.getSize() * 2);
-									moveSubtype = vertex % 2;
-									vertex = vertex / 2;
-									switch (moveSubtype) {
-										case 0:
-											if (gDiagram.isDestabilizeRowValid(vertex)) {
-												if (calcAndCheckProbability(movetype, new int[]{vertex, GridDiagram.MOVE_SUBTYPE_ROW})) {
-													gDiagram.destabilizeRow(vertex);
-													updateCurrentEnergyFromNext();
+								if (generalizedStabilizations){
+									if (gDiagram.getSize() > lowerSize) {
+										vertex = (int)(rand.nextDouble() * gDiagram.getSize() * 2);
+										moveSubtype = vertex % 2;
+										vertex = vertex / 2;
+										switch (moveSubtype) {
+											case 0:
+												if (gDiagram.isDestabilizeRowValid(vertex)) {
+													if (calcAndCheckProbability(movetype, new int[]{vertex, GridDiagram.MOVE_SUBTYPE_ROW})) {
+														gDiagram.destabilizeRow(vertex);
+														updateCurrentEnergyFromNext();
+													}
 												}
-											}
-											break;
-										case 1:
-											if (gDiagram.isDestabilizeColValid(moveSubtype)) {
-												if (calcAndCheckProbability(movetype, new int[]{vertex, GridDiagram.MOVE_SUBTYPE_COLUMN})) {
-													gDiagram.destabilizeCol(moveSubtype);
-													updateCurrentEnergyFromNext();
+												break;
+											case 1:
+												if (gDiagram.isDestabilizeColValid(moveSubtype)) {
+													if (calcAndCheckProbability(movetype, new int[]{vertex, GridDiagram.MOVE_SUBTYPE_COLUMN})) {
+														gDiagram.destabilizeCol(moveSubtype);
+														updateCurrentEnergyFromNext();
+													}
 												}
+												break;
+										}
+									}
+								}else{
+									if (gDiagram.getSize() > lowerSize){
+										vertex = (int)(rand.nextDouble() * gDiagram.getSize() * 2);
+										if (gDiagram.isDestabilizeRowValid(vertex/2) && ((vertex%2==0 && gDiagram.isDestabilizeColValid(gDiagram.getRow(vertex/2).getXCol())) || (vertex%2==1 && gDiagram.isDestabilizeColValid(gDiagram.getRow(vertex/2).getOCol())))){
+											if(calcAndCheckProbability(movetype, new int[]{vertex/2, GridDiagram.MOVE_SUBTYPE_ROW})){
+												gDiagram.destabilizeRow(vertex/2);
+												updateCurrentEnergyFromNext();
 											}
-											break;
+										}
+						
 									}
 								}
 							break;
 						case GridDiagram.MOVETYPE_STABILIZATION:
-							if (gDiagram.getSize() < upperSize) {
-								vertex = (int) (rand.nextDouble() * gDiagram.getSize() * 4);
-								moveSubtype = vertex % 4;
-								vertex = vertex / 4;
-								insertedVertex = (int) (rand.nextDouble() * (gDiagram.getSize() + 1));
-								if (calcAndCheckProbability(movetype, new int[]{vertex, insertedVertex, moveSubtype})) {
-									switch (moveSubtype) {
-										case GridDiagram.INSERT_XO_COLUMN:
-										case GridDiagram.INSERT_OX_COLUMN:
-											//System.out.println("Stabilize insert column"+" "+vertex+" "+insertedVertex);
-											gDiagram.stabilize(vertex, insertedVertex, moveSubtype);
-											break;
-										case GridDiagram.INSERT_XO_ROW:
-										case GridDiagram.INSERT_OX_ROW:
-											//System.out.println("Stabilize insert row"+" "+insertedVertex+" "+vertex);
-											gDiagram.stabilize(insertedVertex, vertex, moveSubtype);
-											break;
+							if (generalizedStabilizations){
+								if (gDiagram.getSize() < upperSize) {
+									vertex = (int)(rand.nextDouble() * gDiagram.getSize() * 4);
+									moveSubtype = vertex % 4;
+									vertex = vertex / 4;
+									insertedVertex = (int) (rand.nextDouble() * (gDiagram.getSize() + 1));
+									if (calcAndCheckProbability(movetype, new int[]{vertex, insertedVertex, moveSubtype})) {
+										switch (moveSubtype) {
+											case GridDiagram.INSERT_XO_COLUMN:
+											case GridDiagram.INSERT_OX_COLUMN:
+												//System.out.println("Stabilize insert column"+" "+vertex+" "+insertedVertex);
+												gDiagram.stabilize(vertex, insertedVertex, moveSubtype);
+												break;
+											case GridDiagram.INSERT_XO_ROW:
+											case GridDiagram.INSERT_OX_ROW:
+												//System.out.println("Stabilize insert row"+" "+insertedVertex+" "+vertex);
+												gDiagram.stabilize(insertedVertex, vertex, moveSubtype);
+												break;
+										}
+										updateCurrentEnergyFromNext();
 									}
-									updateCurrentEnergyFromNext();
+								}
+							}else{
+								if (gDiagram.getSize() < upperSize) {
+									vertex = (int)(rand.nextDouble() * gDiagram.getSize() * 2);
+									if (vertex%2 == 0){
+										insertedVertex = gDiagram.getRow(vertex/2).getXCol();
+									}else{
+										insertedVertex = gDiagram.getRow(vertex/2).getOCol();
+									}
+									vertex = vertex/2;
+									moveSubtype = (int)(rand.nextDouble() * 4);
+									insertedVertex += moveSubtype%2;
+									moveSubtype = moveSubtype/2;
+									if (calcAndCheckProbability(movetype, new int[]{vertex, insertedVertex, moveSubtype})) {
+										gDiagram.stabilize(vertex, insertedVertex, moveSubtype);
+										updateCurrentEnergyFromNext();
+									}
 								}
 							}
 							break;
