@@ -7,6 +7,9 @@ import java.io.ObjectInputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.io.ObjectOutputStream;
+import java.io.FileOutputStream;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
@@ -25,6 +28,7 @@ public class AnalyzeGrids {
     private static final int SIZE_WEIGHTS = 3;
     private static final int WEIGHTS_TO_PARSE = 4;
     private static final int AVERAGE_30_WEIGHTS = 5;
+    private static final int MAKE_SAMPLE_ML_VECTOR = 6;
 
 	private static String inFilePath;
 	private static String outFilePath;
@@ -48,12 +52,42 @@ public class AnalyzeGrids {
             case AVERAGE_30_WEIGHTS:
             	average30Weights();
             	break;
+            case MAKE_SAMPLE_ML_VECTOR:
+                makeSampleMLVector();
+                break;
 			default:
 				System.err.println("No valid mode option detected");
 				System.exit(1);
 				break;
 		}
 	}
+
+    private static void makeSampleMLVector(){
+        String[] knotlist = new String[]{"3_1", "4_1", "5_1", "5_2", "6_1", "6_2", "6_3","7_1","7_2","7_3","7_4","7_5","7_6","7_7",
+            "8_1","8_2","8_3","8_4","8_5","8_6","8_7","8_8","8_9","8_10","8_11","8_12","8_13","8_14","8_15","8_16","8_17","8_18",
+            "8_19","8_20","8_21"};
+        GridDiagram gd;
+        int[][] savableGrid;
+        String outString;
+        for (String knotname : knotlist){
+            outString = knotname;
+            gd = new GridDiagram(knotname);
+            savableGrid = gd.getSavableGrid();
+            for (int i : savableGrid[0]){
+                outString += " "+i;
+            }
+            for (int j = 0; j<(20-savableGrid[0].length); j++){
+                outString += " -1";
+            }
+            for (int i : savableGrid[1]){
+                outString += " "+i;
+            }
+            for (int j = 0; j<(20-savableGrid[1].length); j++){
+                outString += " -1";
+            }
+            System.out.println(outString);
+        }
+    }
 
 	private static void average30Weights(){
 		HashMap<Energy, ArrayList<Double>> allinfo = new HashMap();
@@ -82,12 +116,25 @@ public class AnalyzeGrids {
                 System.err.println(e);
             }
         }
+        HashMap<Energy, Double> averageWeights = new HashMap();
+        double averageWeight;
         for (Map.Entry<Energy, ArrayList<Double>> entry : allinfo.entrySet()){
-            printAverageInfo(entry.getKey(), entry.getValue());
+            averageWeight = printAverageInfo(entry.getKey(), entry.getValue());
+            averageWeights.put(entry.getKey(), averageWeight);
         }
+        try (FileOutputStream outFile = new FileOutputStream(new File(outFilePath+".wts"));
+            ObjectOutputStream outObj = new ObjectOutputStream(outFile))
+        {
+            outObj.writeObject(averageWeights);
+        }catch (FileNotFoundException e){
+            System.out.println(e);
+        } catch (IOException e){
+            System.out.println(e);
+        }
+        
 	}
 
-    private static void printAverageInfo(Energy en, ArrayList<Double> weights){
+    private static double printAverageInfo(Energy en, ArrayList<Double> weights){
         double sum = 0;
         for (double w : weights){
             sum += w;
@@ -102,7 +149,13 @@ public class AnalyzeGrids {
         double ciUpper = mean + 1.96*std/Math.sqrt(weights.size());
         double maxdistance = (Double)Collections.max(weights) - (Double)Collections.min(weights);
         //System.out.println("For energy "+en+" CI = ("+ciLower+", "+ciUpper+") CI width = "+(ciUpper-ciLower)+" range: "+maxdistance);
-        System.out.println(en.getEnergyState()[0]+" "+mean+" "+ciLower+" "+ciUpper);
+        //System.out.println(en.getEnergyState()[0]+" "+mean+" "+ciLower+" "+ciUpper);
+        String outline = ""+en.getEnergyState()[0];
+        for (Double entry : weights){
+            outline += " "+entry;
+        }
+        System.out.println(outline);
+        return mean;
     }
 
     private static void weightsToParse(){
@@ -324,6 +377,9 @@ public class AnalyzeGrids {
                     break;
                 case "--average-30-weights":
                     mode = AVERAGE_30_WEIGHTS;
+                    break;
+                case "--generate-sample-ml-vector":
+                    mode = MAKE_SAMPLE_ML_VECTOR;
                     break;
                 default:
                     System.out.println("Unknown argument: "+args[i]);
