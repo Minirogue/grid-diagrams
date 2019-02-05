@@ -297,9 +297,9 @@ public class WangLandau {
 												}
 												break;
 											case 1:
-												if (gDiagram.isDestabilizeColValid(moveSubtype)) {
+												if (gDiagram.isDestabilizeColValid(vertex)) {
 													if (calcAndCheckProbability(movetype, new int[]{vertex, GridDiagram.MOVE_SUBTYPE_COLUMN})) {
-														gDiagram.destabilizeCol(moveSubtype);
+														gDiagram.destabilizeCol(vertex);
 														updateCurrentEnergyFromNext();
 													}
 												}
