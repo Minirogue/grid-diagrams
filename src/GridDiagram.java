@@ -10,6 +10,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/** 
+* Class for grid diagram representations of links including
+* methods for transforming them and performing calculations on them
+*/
 public class GridDiagram implements Serializable {
     public static final long serialVersionUID = 0;
 
@@ -26,10 +30,14 @@ public class GridDiagram implements Serializable {
     public static final int MOVE_SUBTYPE_COLUMN = 1;
     public static final int MOVE_SUBTYPE_ROW = 2;
 
-
+    /* The actual grid is stored as a list of rows and a list of columns. Only one of these lists is necessary,
+    *  but using both cuts down on a lot of unnecessary computations.
+    */ 
     private ArrayList<Row> rows;
     private ArrayList<Column> cols;
+    //The size of the grid is stored and updated as necessary.
     private int size;
+
 
     public GridDiagram(ArrayList<Integer> initXCol, ArrayList<Integer> initOCol, ArrayList<Integer> initXRow, ArrayList<Integer> initORow){
         rows = new ArrayList<>();
@@ -55,6 +63,10 @@ public class GridDiagram implements Serializable {
         }
         this.size = initXCol.length;
     }
+    /**
+    * Construct GridDiagram from the link name (assuming the .grd file is correctly in place)
+    * @param linkName The link type of the desired grid diagram
+    */
     public GridDiagram(String linkName){
         try{
             InputStream inFile = getClass().getClassLoader().getResourceAsStream("knot_conformations/"+linkName+".grd");
@@ -75,9 +87,21 @@ public class GridDiagram implements Serializable {
         }
     }
 
-
+    /**
+    * The size of an n-by-n grid diagram is simply n.
+    *
+    * @return Size of the grid diagram
+    */
     public int getSize(){ return size; }
+    /**
+    * @param i the column to return, counting from the left starting at 0
+    * @return a Column object representing column i
+    */
     public Column getCol(int i){ return cols.get(i); }
+    /**
+    * @param i the row to return, counting from the top starting at 0
+    * @return a Row object representing row i
+    */
     public Row getRow(int i){ return rows.get(i); }
 
 
