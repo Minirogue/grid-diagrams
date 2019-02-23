@@ -29,9 +29,11 @@ public class AnalyzeGrids {
     private static final int WEIGHTS_TO_PARSE = 4;
     private static final int AVERAGE_30_WEIGHTS = 5;
     private static final int MAKE_SAMPLE_ML_VECTOR = 6;
+    private static final int MAKE_ML_VECTOR = 7;
 
 	private static String inFilePath;
 	private static String outFilePath;
+    private static String knotName;
 	private static int mode = -1;
 
 	public static void main(String[] args){
@@ -54,6 +56,9 @@ public class AnalyzeGrids {
             	break;
             case MAKE_SAMPLE_ML_VECTOR:
                 makeSampleMLVector();
+                break;
+            case MAKE_ML_VECTOR:
+                makeMLVectors();
                 break;
 			default:
 				System.err.println("No valid mode option detected");
@@ -88,6 +93,51 @@ public class AnalyzeGrids {
             System.out.println(outString);
         }
     }
+
+    private static String rowToVec(int x, int o, int length){
+        String returnString = "";
+        for (int i = 0; i<length; i++){
+            if (i==x || i==o){
+                returnString += " 1";
+            }
+            else{
+                returnString += " 0";
+            }
+        }
+        return returnString;
+    }
+
+    private static void makeMLVectors(){
+        try (FileInputStream fis = new FileInputStream(inFilePath+".grds");
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            ObjectInputStream ois = new ObjectInputStream(bis))
+        {
+            int[][] savableGrid;
+            String outString;
+            while(true){
+                outString = knotName;
+                savableGrid = (int[][])ois.readObject();
+                if (savableGrid[0].length <= 20){
+                    for (int i=0; i<savableGrid[0].length; i++){
+                        outString += rowToVec(savableGrid[0][i], savableGrid[1][i], 20);
+                    }
+                    for (int i=0; i<20-savableGrid[0].length; i++){
+                        outString += rowToVec(-1, -1, 20);
+                    }
+                    System.out.println(outString);
+                }
+            }
+        }catch (EOFException e){
+            //We need to reach the end of the file. There doesn't seem to be a better way to deal with this.
+        }
+        catch (ClassNotFoundException e){
+            System.err.println(e);
+        }
+        catch (IOException e){
+            System.err.println(e);
+        }
+    }
+
 
 	private static void average30Weights(){
 		HashMap<Energy, ArrayList<Double>> allinfo = new HashMap();
@@ -363,6 +413,11 @@ public class AnalyzeGrids {
                     outFilePath = args[i+1];
                     i++;
                     break;
+                case "-k":
+                case "--knot-name":
+                    knotName = args[i+1];
+                    i++;
+                    break;
                 case "-SW":
                 	mode = SIZEWRITHE_TRAINED_AND_SAMPLED_MODE;
                 	break;
@@ -380,6 +435,9 @@ public class AnalyzeGrids {
                     break;
                 case "--generate-sample-ml-vector":
                     mode = MAKE_SAMPLE_ML_VECTOR;
+                    break;
+                case "-ML":
+                    mode = MAKE_ML_VECTOR;
                     break;
                 default:
                     System.out.println("Unknown argument: "+args[i]);
