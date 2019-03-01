@@ -19,7 +19,11 @@ import java.io.File;
 
 //TODO add options for input/output
 //TODO add options for interpreting data in different ways
-
+/**
+*	Takes an existing set of Wang-Landau weights and quickly extends them to a larger maximum size.
+*	The weights resulting from this work well as an initial set of weights for Wang-Landau training (better than null or the previous weights).
+*	These weights should not be taken as an actual good estimate of Wang-Landau weights (they need to be trained first).
+*/
 public class ExtendWeights {
 
 	private static final int SIZE = 1;
