@@ -28,7 +28,6 @@ public class WangLandau {
 	protected String outputPath;
 	protected double defaultWeight = 0.0;
 	protected boolean makeMovie = false;
-	protected int histThreshold = Integer.MAX_VALUE;
 	protected Random rand = new Random();
 	protected boolean generalizedStabilizations = true;
 
@@ -43,20 +42,52 @@ public class WangLandau {
 		gDiagram.printToTerminal();
 	}
 
+	/**
+	*	Set the filepath for all output files.
+	*	@param filename The filepath for output .wts, .grds, etc. files. Do not include an extension.
+	*/
 	public void setOutputPath(String filename){ outputPath = filename; }
+	/**
+	*	Sets the maximum grid size to use in the state space.
+	*	Default value is 100.
+	*	@param newbound The new upper bound on grid size.
+	*/
 	public void setUpperSize(int newbound){ upperSize = newbound; }
+	/**
+	*	Sets the minimum grid size to use in the state space.
+	*	Default value is 0.
+	*	If this value is below the arc index of the link being explored, then it is effectively just the arc index.
+	*	@param newbound The new lower bound on grid size.
+	*/
 	public void setLowerSize(int newbound){ lowerSize = newbound; }
-	public void setHistThreshold(int newthreshold){
-		histThreshold = newthreshold;
-	}
+	/**
+	*	Set the seed for the random number generator for replication of runs,
+	*	or to ensure that different runs are not identical, (which may happen if they are run simultaneously).
+	*	@param newSeed The seed ot use.
+	*/
 	public void setRandomSeed(long newSeed){
 		rand.setSeed(newSeed);
 	}
+	/**
+	*	Set whether to use generalized stabilizations (true) or regular stabilizations (false).
+	*	Default true.
+	*	@param newval boolean determining whether to use generalized stabilizations or not
+	*/
 	public void setGeneralizedStabilizations(boolean newval){
 		generalizedStabilizations = newval;
 	}
 
+	/**
+	*	Get the current weights being used by this instance of Wang-Landau.
+	*	The weights are stored in a HashMap<Energy,Double>
+	*	@return Wang-Landau weights
+	*/
 	public HashMap<Energy, Double> getWeights(){ return weights; }
+	/**
+	*	Finds the largest current weight and uses that as the starting weight for all newly discovered
+	*	weights during training instead of using 0.
+	*	@deprecated ?
+	*/
 	public void setDefaultWeightToMax(){
 		if (weights.isEmpty()){
 			defaultWeight = 0;
@@ -66,9 +97,14 @@ public class WangLandau {
 		}
 	}
 
+	//TODO get rid of this?
 	public void setMakeMovie(boolean newval){
 		makeMovie = newval;
 	}
+	/**
+	*	Initializes the Wang-Landau weights from a file
+	*	@param filename The filepath to load the weights from. Include the extension.
+	*/
 	public boolean loadWeightsFromFile(String filename){
 		try{
 			FileInputStream inFile = new FileInputStream(new File(filename));
@@ -89,6 +125,9 @@ public class WangLandau {
 		}
 		return false;
 	}
+	/**
+	*	Saves the current weights to the file specified by outputPath
+	*/
 	protected boolean saveWeightsToFile(){
 		if (outputPath != null){
 			try{
@@ -108,6 +147,7 @@ public class WangLandau {
 		}
 		return false;
 	}
+	//TODO remove?
 	protected void printToMovie(HashMap<Energy, Integer> histogram){//WARNING: this assumes size is energy
 		String weightString = "";
 		String histString = "";
@@ -128,18 +168,41 @@ public class WangLandau {
 			System.out.println(e);
 		}
 	}
+	/**
+	*	@return the current grid diagram
+	*/
 	public GridDiagram getGridDiagram(){ return gDiagram; }
-	public void updateCurrentEnergyFromNext(){
-		currentEnergy = nextEnergy;//TODO should I construct a new object here?
+
+	/**
+	*	Transfer Energy object in nextEnergy to currentEnergy.
+	*	This should be done after a move is successfully performed.
+	*/
+	protected void updateCurrentEnergyFromNext(){
+		currentEnergy = nextEnergy;
 	}
+	/**
+	*	Set currentEnergy to an Energy object calculated from the current grid diagram.
+	*/
 	public void calcAndSetCurrentEnergy(){
 		currentEnergy = new Energy(gDiagram);
 	}
-
+	/**
+	*	Set nextEnergy according to the current grid diagram and a proposed move to perform on it.
+	*	@param movetype the proposed move as a MOVETYPE constant from the GridDiagram class
+	*	@param arguments the list of arguments which would would be fed to the move's method when performed
+	*/
 	public void calcAndSetNextEnergy(int movetype, int[] arguments){
 		nextEnergy = new Energy(currentEnergy, gDiagram, movetype, arguments);
 	}
 
+	/**
+	*	Takes a proposed move, calculates the acceptance probability based on the Wang-Landau weights,
+	*	then tests if it is accepted and returns whether or not the move should be performed.
+	*	I.e. this is the Metropolis-Hastings step.
+	*	@param movetype the proposed move as a MOVETYPE constant from the GridDiagram class
+	*	@param arguments the list of arguments which would would be fed to the move's method when performed
+	*	@return true if the move is accepted, false if it is rejected
+	*/
 	public boolean calcAndCheckProbability(int movetype, int[] arguments){
 		calcAndSetNextEnergy(movetype, arguments);
 		double prob;
@@ -169,12 +232,26 @@ public class WangLandau {
 		return Math.log(rand.nextDouble()) < prob;
 	}
 
+	/**
+	*	Reset all entries in the histogram to 0.
+	*	Usually performed after the modification factor is updated.
+	*	@param histogram The histogram to be cleared.
+	*/
 	protected void clearHistogram(HashMap<Energy, Integer> histogram){
 		for (Energy key : weights.keySet()){
 			histogram.put(key, 0);
 		}
 	}
 
+	/**
+	*	Runs the Wang-Landau algorithm, periodically updating and saving the Wang-Landau weights.
+	*	@param steps The number of attempted steps to perform between weight updates
+	*	@param flatCheckFreq The number of weight updates to perform before checking whether or not to move to the next f.
+	*	This is also when the weights are saved to the output file.
+	*	@param fStart The first value of f to use. This number is added to the stored weights when they are updated.
+	*	@param fFinal The training ends when f is less than this value.
+	*	@param fModFactor f is multiplied by this number every time it is updated.
+	*/
 	public void train(int steps, int flatCheckFreq, double fStart, double fFinal, double fModFactor){
 		HashMap<Energy, Integer> histogram = new HashMap<>();
 		//boolean isFirstF = true;
@@ -226,6 +303,11 @@ public class WangLandau {
 		System.out.println(weights.entrySet());
 	}
 
+	/**
+	*	Since the important info stored in the weights list is the difference between the weights, they can all be subtracted
+	*	by the same number and the weights will represent the same information. This method renormalizes the weights all to the
+	*	smallest value. This helps avoid overflow, especially if considering the exponentiation of these weights.
+	*/
 	protected void normalizeWeights(){
 		double reduction_value = Collections.min(weights.values())-1;
 		for (Energy key : weights.keySet()){
@@ -233,6 +315,11 @@ public class WangLandau {
 		}
 	}
 
+	/**
+	*	Using the Wang-Landau weights, sample grid diagrams. They are saved to outputpath+".grds".
+	*	@param steps The number of steps to take between samples.
+	*	@param numsamples The number of samples to take.
+	*/
 	public void sample(int steps, int numsamples){
 		try (FileOutputStream outFile = new FileOutputStream(new File(outputPath+".grds"));
 			BufferedOutputStream bufferedOut = new BufferedOutputStream(outFile, 8192*16);
@@ -252,6 +339,10 @@ public class WangLandau {
 		}
 	}
 
+	/**
+	*	Take steps along the Markov chain defined by the Wang-Landau weights.
+	*	@param steps The number of steps to take
+	*/
 	protected void run(int steps){
 		int movetype;
 		int vertex;
