@@ -53,7 +53,7 @@ public class RunWangLandau {
         }
         if (isTraining){
         	wl.setMakeMovie(isMakeMovie);
-        	wl.setHistThreshold(histThreshold);
+        	//wl.setHistThreshold(histThreshold);
         	printTrainingLogFile();
         	wl.train(steps, flatCheckFrequency, fStart, fFinal, fChange);
         }
