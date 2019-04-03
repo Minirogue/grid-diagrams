@@ -30,6 +30,7 @@ public class AnalyzeGrids {
     private static final int AVERAGE_30_WEIGHTS = 5;
     private static final int MAKE_SAMPLE_ML_VECTOR = 6;
     private static final int MAKE_ML_VECTOR = 7;
+    private static final int SIZEWRITHE_MAKE_TEX_TABLE = 8;
 
 	private static String inFilePath;
 	private static String outFilePath;
@@ -44,6 +45,9 @@ public class AnalyzeGrids {
 				break;
 			case SIZEWRITHE_TRAINED_AND_SAMPLED_MODE:
 				analyzeSizeWritheWeights();
+				break;
+			case SIZEWRITHE_MAKE_TEX_TABLE:
+				sizeWritheMaxMin();
 				break;
             case SIZE_WEIGHTS:
                 printSizeWeights();
@@ -328,6 +332,82 @@ public class AnalyzeGrids {
         }
 	}
 
+	private static void sizeWritheMaxMin(){
+		HashMap<Energy,Double> weights = null;
+		try (FileInputStream fis = new FileInputStream(inFilePath+".wts");
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            ObjectInputStream ois = new ObjectInputStream(bis))
+        {
+        	weights = (HashMap<Energy, Double>)ois.readObject();
+        }catch (EOFException e){
+        	System.err.println(e);
+        	System.err.println("No data in file?");
+        }
+        catch (ClassNotFoundException e){
+            System.err.println(e);
+        }
+        catch (IOException e){
+            System.err.println(e);
+        }
+        if (weights != null){
+        	HashMap<Integer, ArrayList<Double>> sizeToWrithes = new HashMap();
+        	HashMap<Integer, ArrayList<Double>> sizeToWeights = new HashMap();
+        	Energy thisEnergy;
+        	Double thisWeight;
+        	int thisSize;
+        	double thisWrithe;
+        	ArrayList<Double> writheAL;
+        	ArrayList<Double> weightAL;
+        	for (Map.Entry<Energy, Double> entry : weights.entrySet()){
+        		thisEnergy = entry.getKey();
+        		thisSize = (int)thisEnergy.getEnergyState()[0];
+        		thisWrithe = (int)thisEnergy.getEnergyState()[1];
+        		thisWeight = (Double)entry.getValue();
+        		if (sizeToWrithes.containsKey(thisSize)){
+        			writheAL = sizeToWrithes.get(thisSize);
+        			weightAL = sizeToWeights.get(thisSize);
+        		}else{
+        			writheAL = new ArrayList<Double>();
+        			weightAL = new ArrayList<Double>();
+        			sizeToWrithes.put(thisSize, writheAL);
+        			sizeToWeights.put(thisSize, weightAL);
+        		}
+        		weightAL.add(thisWeight);
+        		writheAL.add(thisWrithe);
+        	}
+        	int maxSize = 0;
+        	int minSize = 0;
+        	double maxWrithe = -Double.MAX_VALUE;
+        	double minWrithe = Double.MAX_VALUE;
+        	for (int currSize : sizeToWeights.keySet()){
+        		writheAL = sizeToWrithes.get(currSize);
+        		weightAL = sizeToWeights.get(currSize);
+   				double reduction_value = Collections.min(weightAL);
+   				double sum = 0;
+   				double count = 0;
+   				//System.out.println(writheAL);
+   				//System.out.println(weightAL);
+   				for (int i = 0; i<writheAL.size(); i++){
+   					thisWeight = weightAL.get(i);
+   					thisWrithe = writheAL.get(i);
+   					sum += Math.exp(thisWeight-reduction_value)*thisWrithe;
+   					count += Math.exp(thisWeight-reduction_value);
+   				}
+   				double avg = sum/count;
+   				if (!Double.isNaN(avg) && avg < minWrithe){
+   					minWrithe = avg;
+   					minSize = currSize;
+   				}
+   				if (!Double.isNaN(avg) && avg > maxWrithe){
+   					maxWrithe = avg;
+   					maxSize = currSize;
+   				}
+   				
+        	}
+        	System.out.println("$"+knotName+"$ & $"+minSize+"$ & $"+minWrithe+"$ & $"+maxSize+"$ & $"+maxWrithe+"$ \\");
+        }
+	}
+
 	private static void splitWrithesToFiles(){
 		HashMap<Integer, ArrayList<Integer>> fullData = new HashMap();
 		try (FileInputStream fis = new FileInputStream(inFilePath+".grds");
@@ -420,6 +500,9 @@ public class AnalyzeGrids {
                     break;
                 case "-SW":
                 	mode = SIZEWRITHE_TRAINED_AND_SAMPLED_MODE;
+                	break;
+                case "-SWtex":
+                	mode = SIZEWRITHE_MAKE_TEX_TABLE;
                 	break;
                 case "-S":
                 	mode = SIZE_TRAINED_AND_SAMPLED_MODE;
