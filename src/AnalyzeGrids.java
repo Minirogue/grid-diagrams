@@ -31,6 +31,7 @@ public class AnalyzeGrids {
     private static final int MAKE_SAMPLE_ML_VECTOR = 6;
     private static final int MAKE_ML_VECTOR = 7;
     private static final int SIZEWRITHE_MAKE_TEX_TABLE = 8;
+    private static final int PRINT_SIZEWRITHE_WEIGHTS = 9;
 
 	private static String inFilePath;
 	private static String outFilePath;
@@ -63,6 +64,9 @@ public class AnalyzeGrids {
                 break;
             case MAKE_ML_VECTOR:
                 makeMLVectors();
+                break;
+            case PRINT_SIZEWRITHE_WEIGHTS:
+                printSizeWritheWeights();
                 break;
 			default:
 				System.err.println("No valid mode option detected");
@@ -332,6 +336,34 @@ public class AnalyzeGrids {
         }
 	}
 
+    private static void printSizeWritheWeights(){
+        HashMap<Energy,Double> weights = null;
+        try (FileInputStream fis = new FileInputStream(inFilePath+".wts");
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            ObjectInputStream ois = new ObjectInputStream(bis))
+        {
+            weights = (HashMap<Energy, Double>)ois.readObject();
+        }catch (EOFException e){
+            System.err.println(e);
+            System.err.println("No data in file?");
+        }
+        catch (ClassNotFoundException e){
+            System.err.println(e);
+        }
+        catch (IOException e){
+            System.err.println(e);
+        }
+        if (weights != null){
+            //Energy eVal;
+            double wVal;
+            for (Energy eVal : weights.keySet()){
+                //eVal = entry.getKey();
+                wVal = weights.get(eVal);
+                System.out.println(eVal.toString()+" "+wVal);
+            }
+        }
+    }
+
 	private static void sizeWritheMaxMin(){
 		HashMap<Energy,Double> weights = null;
 		try (FileInputStream fis = new FileInputStream(inFilePath+".wts");
@@ -504,6 +536,9 @@ public class AnalyzeGrids {
                 case "-SWtex":
                 	mode = SIZEWRITHE_MAKE_TEX_TABLE;
                 	break;
+                case "-SWPure":
+                    mode = PRINT_SIZEWRITHE_WEIGHTS;
+                    break;
                 case "-S":
                 	mode = SIZE_TRAINED_AND_SAMPLED_MODE;
                 	break;
