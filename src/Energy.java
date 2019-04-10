@@ -27,6 +27,9 @@ class Energy implements Serializable {
     //The actual energy values for the current energy object.
     private final Serializable[] energyStates;
 
+    //the neighborhood of this energy
+    private transient Energy[] neighborhood;
+
     //Helper variables in case the object gets hashed more than once
     private int cachedHash;
     private boolean isHashCached;
@@ -85,6 +88,59 @@ class Energy implements Serializable {
     */
     public Serializable[] getEnergyState(){
         return energyStates;
+    }
+
+    /**
+    *   @return an array of energy values that are directly adjacent to the current one
+    */
+    public Energy[] getNeighborhood(){
+        if (neighborhood == null){
+            Serializable[][] oneDimensionalNeighborhoods = new Serializable[energyType.length][];
+            for (int i = 0; i< energyType.length; i++){
+                oneDimensionalNeighborhoods[i] = singleEnergyNeighborhood(energyType[i], energyStates[i]);
+            }
+            int numberOfNeighbors = 1;
+            for (Serializable[] subArr : oneDimensionalNeighborhoods){
+                numberOfNeighbors = numberOfNeighbors*subArr.length;
+            }
+            Serializable[][] preneighborhood = new Serializable[numberOfNeighbors][energyType.length];
+            int add = 1;
+            for (int k = 0; k < energyType.length; k++){
+                int startindex = 0;
+                int index = startindex;
+                for (Serializable j : oneDimensionalNeighborhoods[k]){
+                    for (int i = 0; i<numberOfNeighbors/oneDimensionalNeighborhoods[k].length; i++){
+                        preneighborhood[index][k] = j;
+                        index++;
+                    }
+                    if (index >= numberOfNeighbors){
+                        startindex++;
+                        index = startindex;
+                    }
+                }
+                add = add*oneDimensionalNeighborhoods[k].length;
+            }
+            neighborhood = new Energy[numberOfNeighbors];
+            for (int i = 0; i<numberOfNeighbors; i++){
+                neighborhood[i] = new Energy(preneighborhood[i]);
+            }
+        }
+        return neighborhood;
+    }
+
+
+    /**
+    *   @return an array of what values should be in the neighborhood of the given energyValue and energyType
+    */
+    private  static Serializable[] singleEnergyNeighborhood(int eType, Serializable energyValue){
+        switch (eType){
+            case ENERGYTYPE_SIZE:
+            case ENERGYTYPE_WRITHE:
+                return new Serializable[]{(int)energyValue, (int)energyValue+1, (int)energyValue-1};
+            default:
+                System.err.println("Error, no neighborhood implemented for energy type");
+        }
+        return new Serializable[]{};  
     }
 
     /**
