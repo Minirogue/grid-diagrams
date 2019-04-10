@@ -14,6 +14,7 @@ import java.io.ObjectOutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.Arrays;
 
 public class WangLandau {
 
@@ -256,10 +257,9 @@ public class WangLandau {
 		HashMap<Energy, Integer> histogram = new HashMap<>();
 		//boolean isFirstF = true;
 		double fCurrent = fStart;
-		double currentWeight;//currentMaxWeight, currentMinWeight, 
-		int currentMinHistogram, currentMaxHistogram;
-		double stopThreshold = 1/Math.sqrt(fCurrent);
-		if (makeMovie){
+		double currentWeight;//currentMaxWeight, currentMinWeight,
+		Energy groundState = new Energy(gDiagram);
+		/*if (makeMovie){
 			try{
 				Files.deleteIfExists(Paths.get(outputPath+"_weights.txt"));
 				Files.deleteIfExists(Paths.get(outputPath+"_histogram.txt"));
@@ -267,10 +267,11 @@ public class WangLandau {
 				System.out.println(e);
 			}
 
-		}
+		}*/
 		clearHistogram(histogram);//initialize histogram with all known energy states
 		histogram.put(currentEnergy, 0);//initialize histogram entry for starting state. This is to help with the stopping condition.
 		//run(steps*10);//warmup
+		System.out.println("fCurrent "+fCurrent);
 		while (fCurrent >= fFinal){
 			for (int i = 0; i<flatCheckFreq; i++){
 				run(steps);
@@ -284,24 +285,59 @@ public class WangLandau {
 					printToMovie(histogram);
 				}
 			}
-			currentMinHistogram = Collections.min(histogram.values());
-			//currentMaxHistogram = Collections.max(histogram.values());
-			if (currentMinHistogram > stopThreshold){//+(isFirstF ? 10 : 0)){
-				normalizeWeights();
-				System.out.println("Passed with f=exp("+fCurrent+") and stopping threshold "+stopThreshold);//+((isFirstF ? " + 10." : ".")));
-				System.out.println("Saving weights:");
-				System.out.println(""+weights.entrySet());
+			if (checkFlat(histogram, fCurrent, fModFactor)){//+(isFirstF ? 10 : 0)){
+				//System.out.println(""+weights.entrySet());
+				System.out.println(""+histogram.entrySet());
 				saveWeightsToFile();
 				fCurrent = fCurrent*fModFactor;
-				stopThreshold = 1/Math.sqrt(fCurrent);
+				//System.out.println("estimated_sigma(delta) sqrt(fCurrent*largest/smallest)");
+				System.out.println("fCurrent "+fCurrent);
 				//isFirstF = false;
 				clearHistogram(histogram);
-				System.out.println("Now running with f=exp("+fCurrent+") and stopping threshold "+stopThreshold);
 			}
 		}
-		System.out.println("Final Weights: ");
-		System.out.println(weights.entrySet());
+		//System.out.println("Final Weights: ");
+		//System.out.println(weights.entrySet());
 	}
+
+	/**
+	*	Returns true if there are enough samples to justify moving to the next modification factor
+	*/
+	protected boolean checkFlat(HashMap<Energy, Integer> histogram, double fCurrent, double fModFactor){
+		boolean isFlat = true;
+		double currentWeight;
+		double neighborWeight;
+		for (Energy key : histogram.keySet()){
+			currentWeight = weights.getOrDefault(key, 0.0);
+			if (currentWeight == 0.0){
+				return false;
+			}
+			/*Energy[] neighborhood = key.getNeighborhood();
+			neighborWeight = currentWeight;
+			for (Energy neighbor : neighborhood){
+				if (0.0 < weights.getOrDefault(neighbor, 0.0) && weights.getOrDefault(neighbor, 0.0) < neighborWeight){
+					neighborWeight = weights.getOrDefault(neighbor, 0.0);
+				}
+			}*/
+			//System.out.println(""+key+" "+currentWeight);
+			neighborWeight = currentWeight;
+			if (1.0/(2.0*fCurrent)*(neighborWeight-currentWeight+Math.log(1.0/(fModFactor*fCurrent))) < 0){
+				//System.out.println(Arrays.toString(neighborhood));
+				System.out.println("fCurrent "+fCurrent);
+				System.out.println("fModFactor "+fModFactor);
+				System.out.println("weight "+currentWeight);
+				System.out.println("smallest neighbor "+neighborWeight);
+				System.out.println("threshold "+1.0/(2.0*fCurrent)*(neighborWeight-currentWeight+Math.log(1.0/(fModFactor*fCurrent)))+"\n");
+				System.out.println(""+weights);
+			}
+			if (histogram.get(key) < 1.0/(2.0*fCurrent)*(neighborWeight-currentWeight+Math.log(1.0/(fModFactor*fCurrent)))){
+				//isFlat = false;
+				return false;
+			}
+		}
+		return isFlat;
+	}
+
 
 	/**
 	*	Since the important info stored in the weights list is the difference between the weights, they can all be subtracted
