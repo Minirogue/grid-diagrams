@@ -26,6 +26,7 @@ public class WangLandau {
 	protected Energy currentEnergy;
 	protected Energy nextEnergy;
 	protected HashMap<Energy, Double> weights;
+	protected HashMap<Energy, Double> estimatedError;
 	protected String outputPath;
 	protected double defaultWeight = 0.0;
 	protected boolean makeMovie = false;
@@ -38,6 +39,7 @@ public class WangLandau {
 		Energy.setEnergyType(initEnergyType);
 		calcAndSetCurrentEnergy();
 		weights = new HashMap<>();
+		estimatedError = new HashMap<>();
 		upperSize = 100;//TODO don't hardcode
 		lowerSize = 0;//TODO don't hardcode
 		gDiagram.printToTerminal();
@@ -135,6 +137,7 @@ public class WangLandau {
 				FileOutputStream outFile = new FileOutputStream(new File(outputPath+".wts"));
 				ObjectOutputStream outObj = new ObjectOutputStream(outFile);
 				outObj.writeObject(weights);
+				outObj.writeObject(estimatedError);
 				outObj.close();
 				outFile.close();
 				return true;
@@ -286,8 +289,9 @@ public class WangLandau {
 				}
 			}
 			if (checkFlat(histogram, fCurrent, fModFactor)){//+(isFirstF ? 10 : 0)){
-				//System.out.println(""+weights.entrySet());
-				System.out.println(""+histogram.entrySet());
+				System.out.println("Histogram: "+histogram.entrySet());
+				System.out.println("Weights: "+weights.entrySet());
+				System.out.println("Estimated Error: "+estimatedError.entrySet());
 				saveWeightsToFile();
 				fCurrent = fCurrent*fModFactor;
 				//System.out.println("estimated_sigma(delta) sqrt(fCurrent*largest/smallest)");
@@ -333,6 +337,7 @@ public class WangLandau {
 				//isFlat = false;
 				return false;
 			}
+			estimatedError.put(key, Math.sqrt(Math.exp(currentWeight-neighborWeight)*fCurrent));
 		}
 		return isFlat;
 	}
