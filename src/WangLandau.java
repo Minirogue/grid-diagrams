@@ -312,24 +312,23 @@ public class WangLandau {
 			if (currentWeight == 0.0){
 				return false;
 			}
-			/*Energy[] neighborhood = key.getNeighborhood();
+			Energy[] neighborhood = key.getNeighborhood();
 			neighborWeight = currentWeight;
 			for (Energy neighbor : neighborhood){
 				if (0.0 < weights.getOrDefault(neighbor, 0.0) && weights.getOrDefault(neighbor, 0.0) < neighborWeight){
 					neighborWeight = weights.getOrDefault(neighbor, 0.0);
 				}
-			}*/
+			}
 			//System.out.println(""+key+" "+currentWeight);
-			neighborWeight = currentWeight;
-			if (1.0/(2.0*fCurrent)*(neighborWeight-currentWeight+Math.log(1.0/(fModFactor*fCurrent))) < 0){
-				//System.out.println(Arrays.toString(neighborhood));
+			/*if (1.0/(2.0*fCurrent)*(neighborWeight-currentWeight+Math.log(1.0/(fModFactor*fCurrent))) < 0){
+				System.out.println(Arrays.toString(neighborhood));
 				System.out.println("fCurrent "+fCurrent);
 				System.out.println("fModFactor "+fModFactor);
 				System.out.println("weight "+currentWeight);
 				System.out.println("smallest neighbor "+neighborWeight);
 				System.out.println("threshold "+1.0/(2.0*fCurrent)*(neighborWeight-currentWeight+Math.log(1.0/(fModFactor*fCurrent)))+"\n");
-				System.out.println(""+weights);
-			}
+				//System.out.println(""+weights);
+			}*/
 			if (histogram.get(key) < 1.0/(2.0*fCurrent)*(neighborWeight-currentWeight+Math.log(1.0/(fModFactor*fCurrent)))){
 				//isFlat = false;
 				return false;
@@ -385,6 +384,8 @@ public class WangLandau {
 		int moveSubtype;
 		int insertedVertex;
 			for (int i = 0; i<steps; i++){
+				//uncomment next line to help with energy delta debugging
+				//System.out.println(gDiagram);
 				//TODO implement energies for translations
 				/*if (rand.nextDouble() < 0.01){
 					movetype = (int)(rand.nextDouble()*gDiagram.getSize()*gDiagram.getSize());
@@ -494,12 +495,13 @@ public class WangLandau {
 							break;
 					}
 				//}
-				//Uncomment the next couple of lines to debug energy change calculations
+				//Uncomment the following block to debug energy change calculations
 				/*if (!currentEnergy.equals(new Energy(gDiagram))){
-					System.out.println("error in energy: "+currentEnergy);
-					System.out.println(currentEnergy);
-					System.out.println(new Energy(gDiagram));
-					System.out.println(movetype);
+					System.err.println("error in energy: "+currentEnergy);
+					System.err.println(currentEnergy);
+					System.err.println(new Energy(gDiagram));
+					System.err.println(movetype);
+					System.err.println(gDiagram);
 					System.exit(1);
 				}*/
 		}
