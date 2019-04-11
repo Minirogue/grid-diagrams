@@ -338,11 +338,13 @@ public class AnalyzeGrids {
 
     private static void printSizeWritheWeights(){
         HashMap<Energy,Double> weights = null;
+        HashMap<Energy,Double> estimatedError = null;
         try (FileInputStream fis = new FileInputStream(inFilePath+".wts");
             BufferedInputStream bis = new BufferedInputStream(fis);
             ObjectInputStream ois = new ObjectInputStream(bis))
         {
             weights = (HashMap<Energy, Double>)ois.readObject();
+            estimatedError = (HashMap<Energy, Double>)ois.readObject();
         }catch (EOFException e){
             System.err.println(e);
             System.err.println("No data in file?");
@@ -356,10 +358,12 @@ public class AnalyzeGrids {
         if (weights != null){
             //Energy eVal;
             double wVal;
+            double error;
             for (Energy eVal : weights.keySet()){
                 //eVal = entry.getKey();
                 wVal = weights.get(eVal);
-                System.out.println(eVal.toString()+" "+wVal);
+                error = estimatedError.get(eVal);
+                System.out.println(eVal.toString()+" "+wVal+" "+error);
             }
         }
     }
