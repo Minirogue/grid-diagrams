@@ -108,24 +108,35 @@ public class GridDiagram implements Serializable {
     private ArrayList<Row> getRows(){ return rows; }
     private ArrayList<Column> getCols(){ return cols; }
 
+    /**
+    *   Prints a representation of the grid to the terminal
+    *   @deprecated now that toString has been implemented
+    */
     public void printToTerminal(){
         //System.out.println("Here is the grid:");
+        System.out.println(toString());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder(size*(size+1));
         for (int i=0; i<size; i++){
             int xloc = rows.get(i).getXCol();
             int oloc = rows.get(i).getOCol();
-            System.out.print('\n');
+            str.append('\n');
             for (int j=0; j<size; j++){
                 if (j==xloc){
-                    System.out.print('X');
+                    str.append('X');
                 }else if (j==oloc){
-                    System.out.print('O');
+                    str.append('O');
                 }
                 else{
-                    System.out.print('-');
+                    str.append('-');
                 }
             }
         }
-        System.out.print('\n');
+        str.append('\n');
+        return str.toString();
     }
 
     public void commuteRow(int rownumber){
@@ -501,7 +512,7 @@ public class GridDiagram implements Serializable {
         }
         else if (arguments[1] == MOVE_SUBTYPE_COLUMN){
             Column thisCol;
-            thisCol = cols.get(arguments[1]);
+            thisCol = cols.get(arguments[0]);
             Row xRow = rows.get(thisCol.getXRow());
             Row oRow = rows.get(thisCol.getORow());
             if (xRow.getDirection() == oRow.getDirection()){
