@@ -111,7 +111,7 @@ class Energy implements Serializable {
                 for (Serializable j : oneDimensionalNeighborhoods[k]){
                     for (int i = 0; i<numberOfNeighbors/oneDimensionalNeighborhoods[k].length; i++){
                         preneighborhood[index][k] = j;
-                        index++;
+                        index = index + add;
                     }
                     if (index >= numberOfNeighbors){
                         startindex++;
