@@ -299,6 +299,7 @@ public class WangLandau {
 				}
 			}
 			if (checkFlat(histogram, fCurrent, fModFactor)){//+(isFirstF ? 10 : 0)){
+				normalizeWeights();
 				System.out.println("Histogram: "+histogram.entrySet());
 				System.out.println("Weights: "+weights.entrySet());
 				System.out.println("Estimated Error: "+estimatedError.entrySet());
