@@ -32,6 +32,7 @@ public class WangLandau {
 	protected boolean makeMovie = false;
 	protected Random rand = new Random();
 	protected boolean generalizedStabilizations = true;
+	protected double errorThreshold = 0.0;
 
 
 	public WangLandau(String knotName, int[] initEnergyType){
@@ -78,6 +79,15 @@ public class WangLandau {
 	*/
 	public void setGeneralizedStabilizations(boolean newval){
 		generalizedStabilizations = newval;
+	}
+
+	/**
+	*	Set threshold for error after which histogram thresholds may be ignored because error is considered sufficiently small
+	*	Default 0 (no threshold).
+	*	@param newErr value to set threshold at
+	*/
+	public void setErrorThreshold(double newErr){
+		errorThreshold = newErr;
 	}
 
 	/**
@@ -335,9 +345,13 @@ public class WangLandau {
 			}*/
 			if (histogram.get(key) < 1.0/(2.0*fCurrent)*(neighborWeight-currentWeight+Math.log(1.0/(fModFactor*fCurrent)))){
 				//isFlat = false;
-				return false;
+				if (!estimatedError.containsKey(key) || estimatedError.get(key) > errorThreshold){
+					return false;
+				}
 			}
-			estimatedError.put(key, Math.sqrt(Math.exp(currentWeight-neighborWeight)*fCurrent));
+			else{
+				estimatedError.put(key, Math.sqrt(Math.exp(currentWeight-neighborWeight)*fCurrent));
+			}
 		}
 		return isFlat;
 	}

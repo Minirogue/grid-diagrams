@@ -17,6 +17,7 @@ public class RunWangLandau {
     private static double fStart = 1;
     private static double fFinal = .01;
     private static double fChange = .5;
+    private static double errorThreshold = 0;
     private static int flatCheckFrequency = 20;
     private static boolean isTraining = false;
     private static boolean isSampling = false;
@@ -39,6 +40,7 @@ public class RunWangLandau {
         wl.setUpperSize(maxSize);
         wl.setLowerSize(minSize);
         wl.setGeneralizedStabilizations(useGeneralizedStabilizations);
+        wl.setErrorThreshold(errorThreshold);
         if (inputWeightsFile != null){
             wl.loadWeightsFromFile(inputWeightsFile);
             wl.setDefaultWeightToMax();
@@ -101,6 +103,11 @@ public class RunWangLandau {
                 case "-m":
                 case "--min-size":
                     minSize = Integer.valueOf(args[i+1]);
+                    i++;
+                    break;
+                case "-et":
+                case "--error-threshold":
+                    errorThreshold = Double.valueOf(args[i+1]);
                     i++;
                     break;
                 case "-f":
@@ -202,7 +209,7 @@ public class RunWangLandau {
             writer.println("With exponent changing by a factor of "+fChange);
             writer.println("Until modification factor is less than e^"+fFinal);
             writer.println("Checking for flatness every "+flatCheckFrequency+" samples");
-            writer.println("Histogram threshold = "+histThreshold);
+            writer.println("Error Threshold = "+errorThreshold);
             writer.println("outputting to movie? "+isMakeMovie);
             writer.close();
         }catch (FileNotFoundException e){
