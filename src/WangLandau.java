@@ -322,17 +322,22 @@ public class WangLandau {
 		boolean isFlat = true;
 		double currentWeight;
 		double neighborWeight;
+		double newNeighborWeight;
 		for (Energy key : histogram.keySet()){
 			currentWeight = weights.getOrDefault(key, 0.0);
 			if (currentWeight == 0.0){
 				return false;
 			}
 			Energy[] neighborhood = key.getNeighborhood();
-			neighborWeight = currentWeight;
+			neighborWeight = 0.0;
 			for (Energy neighbor : neighborhood){
-				if (0.0 < weights.getOrDefault(neighbor, 0.0) && weights.getOrDefault(neighbor, 0.0) < neighborWeight){
-					neighborWeight = weights.getOrDefault(neighbor, 0.0);
+				newNeighborWeight = weights.getOrDefault(neighbor, 0.0);
+				if (neighborWeight < newNeighborWeight && newNeighborWeight < currentWeight){
+					neighborWeight = newNeighborWeight;
 				}
+			}
+			if (neighborWeight == 0.0){
+				neighborWeight = currentWeight;
 			}
 			//System.out.println(""+key+" "+currentWeight);
 			/*if (1.0/(2.0*fCurrent)*(neighborWeight-currentWeight+Math.log(1.0/(fModFactor*fCurrent))) < 0){
