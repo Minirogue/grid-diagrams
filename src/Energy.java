@@ -11,7 +11,7 @@ class Energy implements Serializable {
     *	serialVersionUID used for serializing Energy objects,
     *	which is needed when saving a HashMap of Wang-Landau Weights
     */
-    public static final long serialVersionUID = 0;
+    public static final long serialVersionUID = 1;
 
     /*	Constants for specifying energy type.
     *	To add a new energy type, add a constant here, then add it to
@@ -180,10 +180,10 @@ class Energy implements Serializable {
             for (int i=0; i<energyStates.length; i++){
                 switch (energyType[i]){
                     case ENERGYTYPE_SIZE:
-                        calcHash = (cachedHash*31)+(int)energyStates[i];
+                        calcHash = (calcHash*31)+(int)energyStates[i];
                         break;
                     case ENERGYTYPE_WRITHE:
-                        calcHash = (cachedHash*31)+(int)energyStates[i];
+                        calcHash = (calcHash*31)+(int)energyStates[i];
                         break;
                 }
             }
