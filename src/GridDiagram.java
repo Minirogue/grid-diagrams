@@ -88,6 +88,50 @@ public class GridDiagram implements Serializable {
     }
 
     /**
+    * Turns this grid diagram into the connect sum of it and another then returns itself
+    */
+    public GridDiagram concatenate(GridDiagram g2){
+        //Get the coordinates where the grids' vertices will connect
+        int xrow = getCol(size-1).getXRow();
+        int orow = getCol(size-1).getORow();
+        int xcol = g2.getRow(0).getXCol();
+        int ocol = g2.getRow(0).getOCol();
+        //we remove the last column of this grid as it is deleted and its entries are merged into the connecting vertices
+        cols.remove(size-1);
+        for (int i = 0; i<g2.getSize(); i++){
+            Column g2Col = g2.getCol(i);
+            Row g2Row = g2.getRow(i);
+            cols.add(new Column(g2Col.getXRow()+size-1, g2Col.getORow()+size-1));
+            if (i>0){//we don't want to add the first row to the new grid as its entries are merged into the connecting vertices
+                rows.add(new Row(g2Row.getXCol()+size-1, g2Col.getORow()+size-1));
+            }
+        }
+        //Now to merge the grids properly
+        getRow(xrow).setXCol(xcol+size-1);
+        getRow(orow).setOCol(ocol+size-1);
+        getCol(xcol+size-1).setXRow(xrow);
+        getCol(ocol+size-1).setORow(orow);
+        size = size + g2.getSize() - 1;
+        return this;
+    }
+
+
+    /**
+    * Converts a grid diagram to its mirror image.then returns itself..
+    */
+    public GridDiagram mirror(){
+        ArrayList<Row> newRows = new ArrayList();
+        ArrayList<Column> newCol = new ArrayList();
+        for (int i=0; i<size; i++){
+            newCol.add(getCol(size-1-i));
+            newRows.add(new Row(size-getRow(i).getXCol()-1, size-getRow(i).getOCol()-1));
+        }
+        cols = newCol;
+        rows = newRows;
+        return this;
+    }
+
+    /**
     * The size of an n-by-n grid diagram is simply n.
     *
     * @return Size of the grid diagram
