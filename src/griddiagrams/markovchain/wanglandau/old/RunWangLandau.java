@@ -1,6 +1,5 @@
-//package grid_tools;
+package griddiagrams.markovchain.wanglandau.old;//package grid_tools;
 
-import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
@@ -32,7 +31,7 @@ public class RunWangLandau {
         parseArgs(args);
         WangLandau wl; 
         if (useTVariant){
-            wl = new WangLandauT(knotType, energy);
+            wl = new WangLandau(knotType, energy);
         }
         else{
             wl = new WangLandau(knotType, energy);
@@ -201,7 +200,7 @@ public class RunWangLandau {
             writer.println("Random seed: "+seed);
             writer.println("Minimum size: "+minSize);
             writer.println("Maximum size: "+maxSize);
-            writer.println("Energy = "+energyTypeAsString());
+            writer.println("griddiagrams.markovchain.wanglandau.old.Energy = "+energyTypeAsString());
             writer.println("With starting weights from "+ inputWeightsFile);
             writer.println("Saving weights to "+outputFilePath+".wts");
             writer.println("Sampling every "+steps+" steps");
@@ -227,7 +226,7 @@ public class RunWangLandau {
             writer.println("Random seed: "+seed);
             writer.println("Minimum size: "+minSize);
             writer.println("Maximum size: "+maxSize);
-            writer.println("Energy = "+energyTypeAsString());
+            writer.println("griddiagrams.markovchain.wanglandau.old.Energy = "+energyTypeAsString());
             writer.println("With starting weights from "+ inputWeightsFile);
             writer.println("Saving samples to "+outputFilePath+".grds");
             writer.println("Sampling every "+steps+" steps");

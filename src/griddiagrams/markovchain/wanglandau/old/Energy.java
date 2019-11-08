@@ -1,14 +1,16 @@
-//package grid_tools;
+package griddiagrams.markovchain.wanglandau.old;//package grid_tools;
+
+import griddiagrams.GridDiagram;
 
 import java.io.Serializable;
 
 /**
-*	Energy objects hold energy states for the Wang-Landau algorithm.
+*	griddiagrams.markovchain.wanglandau.old.Energy objects hold energy states for the Wang-Landau algorithm.
 *	This class is designed to be updateable for new energy types.
 */
-class Energy implements Serializable {
+public class Energy implements Serializable {
     /**
-    *	serialVersionUID used for serializing Energy objects,
+    *	serialVersionUID used for serializing griddiagrams.markovchain.wanglandau.old.Energy objects,
     *	which is needed when saving a HashMap of Wang-Landau Weights
     */
     public static final long serialVersionUID = 1;
@@ -35,7 +37,7 @@ class Energy implements Serializable {
     private boolean isHashCached;
 
     /**
-    *	Construct the Energy object from a grid diagram
+    *	Construct the griddiagrams.markovchain.wanglandau.old.Energy object from a grid diagram
     * 	@param gDiagram the grid diagram to calculate the energy state of
     */
     public Energy(GridDiagram gDiagram){
@@ -53,7 +55,7 @@ class Energy implements Serializable {
         isHashCached = false;
     }
     /**
-    *	Construct the Energy object for the grid diagram resulting from a Cromwell move
+    *	Construct the griddiagrams.markovchain.wanglandau.old.Energy object for the grid diagram resulting from a Cromwell move
     * 	@param currentEnergy The energy state of the current grid diagram
     *	@param gDiagram The current grid diagram which is being transformed
     *	@param movetype The move being performed. Use the GridDiagram MOVETYPE constants for this argument
@@ -76,7 +78,7 @@ class Energy implements Serializable {
     }
 
     /**
-    * Construct the Energy object from an array of energy values representing the current energy state
+    * Construct the griddiagrams.markovchain.wanglandau.old.Energy object from an array of energy values representing the current energy state
     * @param currentState an array of energy values where the value in index i corresponds to energyType[i]
     */
     public Energy(Serializable[] currentState){
@@ -144,7 +146,7 @@ class Energy implements Serializable {
     }
 
     /**
-    *	Note that this method is static, so all Energy objects should use the same energyType
+    *	Note that this method is static, so all griddiagrams.markovchain.wanglandau.old.Energy objects should use the same energyType
     *	@param newEnergyType an array of ENERGYTYPE constants (from this class)
     */
     public static void setEnergyType(int[] newEnergyType){
@@ -153,7 +155,7 @@ class Energy implements Serializable {
 
 
     /**
-    *	Two Energy objects are equal if each of their energy values are equal
+    *	Two griddiagrams.markovchain.wanglandau.old.Energy objects are equal if each of their energy values are equal
     */
     @Override
     public boolean equals(Object o){
