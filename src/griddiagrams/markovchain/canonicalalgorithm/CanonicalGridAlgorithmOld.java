@@ -1,14 +1,16 @@
-//package grid_tools;
+package griddiagrams.markovchain.canonicalalgorithm;//package grid_tools;
+
+import griddiagrams.GridDiagram;
 
 import java.util.ArrayList;
 
-public class GridAlgorithm {
+public class CanonicalGridAlgorithmOld {
 
 	private GridDiagram gDiagram;
 	private double z;
 	ArrayList<Double[]> probabilities;
 
-	public GridAlgorithm(String knotName, double initZ){
+	public CanonicalGridAlgorithmOld(String knotName, double initZ){
 		gDiagram = new GridDiagram(knotName);
 		probabilities = new ArrayList<>();
 		probabilities.add(new Double[]{1.0,1.0,1.0});
@@ -39,12 +41,12 @@ public class GridAlgorithm {
 							vertex = (int)(Math.random()*gDiagram.getSize()*2);
 							if (vertex%2 == 0){
 								//System.out.println("commute row"+(vertex/2));
-								//delta = gDiagram.deltaWrithe(movetype, new int[]{vertex/2, GridDiagram.MOVE_SUBTYPE_ROW});
+								//delta = gDiagram.deltaWrithe(movetype, new int[]{vertex/2, griddiagrams.GridDiagram.MOVE_SUBTYPE_ROW});
 								gDiagram.commuteRowIfValid(vertex/2);
 							}
 							else{
 								//System.out.println("commute column"+(vertex/2));
-								//delta = gDiagram.deltaWrithe(movetype, new int[]{vertex/2, GridDiagram.MOVE_SUBTYPE_COLUMN});
+								//delta = gDiagram.deltaWrithe(movetype, new int[]{vertex/2, griddiagrams.GridDiagram.MOVE_SUBTYPE_COLUMN});
 								gDiagram.commuteColIfValid(vertex/2);
 							}
 							/*if (prevWrithe+delta != gDiagram.calcWrithe()){
@@ -69,11 +71,11 @@ public class GridAlgorithm {
 									break;
 								}
 								if (gDiagram.isDestabilizeRowValid(vertex)){
-									//delta = gDiagram.deltaWrithe(movetype, new int[]{vertex, moveSubtype, GridDiagram.MOVE_SUBTYPE_ROW});										
+									//delta = gDiagram.deltaWrithe(movetype, new int[]{vertex, moveSubtype, griddiagrams.GridDiagram.MOVE_SUBTYPE_ROW});
 									gDiagram.destabilizeRow(vertex);
 								}
 								else if (gDiagram.isDestabilizeColValid(moveSubtype)){
-									//delta = gDiagram.deltaWrithe(movetype, new int[]{vertex, moveSubtype, GridDiagram.MOVE_SUBTYPE_COLUMN});
+									//delta = gDiagram.deltaWrithe(movetype, new int[]{vertex, moveSubtype, griddiagrams.GridDiagram.MOVE_SUBTYPE_COLUMN});
 									gDiagram.destabilizeCol(moveSubtype);
 								}
 								/*if (prevWrithe+delta != gDiagram.calcWrithe()){

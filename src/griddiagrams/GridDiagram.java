@@ -1,8 +1,6 @@
-//package grid_tools;
+package griddiagrams;//package grid_tools;
 
-import java.io.File;
 import java.io.InputStream;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -64,12 +62,12 @@ public class GridDiagram implements Serializable {
         this.size = initXCol.length;
     }
     /**
-    * Construct GridDiagram from the link name (assuming the .grd file is correctly in place)
+    * Construct griddiagrams.GridDiagram from the link name (assuming the .grd file is correctly in place)
     * @param linkName The link type of the desired grid diagram
     */
     public GridDiagram(String linkName){
         try{
-            InputStream inFile = getClass().getClassLoader().getResourceAsStream("knot_conformations/"+linkName+".grd");
+            InputStream inFile = getClass().getClassLoader().getResourceAsStream("knot_conformations/griddiagrams/"+linkName+".grd");
             ObjectInputStream inObj = new ObjectInputStream(inFile);
             GridDiagram diagramFromFile = (GridDiagram)inObj.readObject();
             inObj.close();
