@@ -9,7 +9,7 @@ public abstract class MetropolisHastingsMarkovChain<MarkovState> extends MarkovC
     @Override
     public MarkovState step(MarkovState markovState) {
         MarkovMove<MarkovState> move = getMoveSelector().getRandomMove(markovState);
-        if (Math.random() < getAcceptanceProbability(markovState, move)){
+        if (isMoveWithinConstraints(markovState, move) && Math.random() < getAcceptanceProbability(markovState, move)){
             return move.perform();
         }else{
             return markovState;

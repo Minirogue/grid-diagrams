@@ -15,12 +15,37 @@ public class GridMove implements MarkovMove<GridDiagram> {
         this.moveType = moveType;
         this.fourTimesVertex = fourTimesVertex;
         this.insertedVertex = insertedVertex;
+        if (!isValid()){
+            this.moveType = GridDiagram.MOVETYPE_NONE;
+        }
     }
 
+    public boolean isValid() {
+        switch (moveType) {
+            case GridDiagram.MOVETYPE_COMMUTATION:
+                if (fourTimesVertex % 2 == 0) {
+                    return startingDiagram.isCommuteRowValid(fourTimesVertex / 4);
+                } else {
+                    return startingDiagram.isCommuteColValid(fourTimesVertex / 4);
+                }
+            case GridDiagram.MOVETYPE_DESTABILIZATION:
+                if (fourTimesVertex % 2 == 0) {
+                    return startingDiagram.isDestabilizeRowValid(fourTimesVertex / 4);
+                } else{
+                    return startingDiagram.isDestabilizeColValid(fourTimesVertex / 4);
+                }
+            case GridDiagram.MOVETYPE_STABILIZATION:
+                return true;
+            default:
+                return false;
+        }
+    }
 
     @Override
     public GridDiagram perform() {
         switch (moveType) {
+            case GridDiagram.MOVETYPE_NONE:
+                break;
             case GridDiagram.MOVETYPE_COMMUTATION:
                 if (fourTimesVertex % 2 == 0) {
                     startingDiagram.commuteRowIfValid(fourTimesVertex / 4);

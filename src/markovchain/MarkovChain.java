@@ -27,7 +27,11 @@ public abstract class MarkovChain<MarkovState> {
      */
     public MarkovState step(MarkovState state) {
         MarkovMove<MarkovState> move = getMoveSelector().getRandomMove(state);
-        return move.perform();
+        if (isMoveWithinConstraints(state, move)){
+            return move.perform();
+        }else {
+            return state;
+        }
     }
 
     /**
@@ -55,6 +59,18 @@ public abstract class MarkovChain<MarkovState> {
      * @return A copy of the given state with no references to the original object.
      */
     public abstract MarkovState copy(MarkovState state);
+
+    /**
+     * Override this method to impose constraints on the state space.
+     *
+     * @param state The current state from which the move is being proposed.
+     * @param move The move being proposed.
+     * @return true if the proposed move is allowed, false if it is not.
+     */
+    public boolean isMoveWithinConstraints(MarkovState state, MarkovMove<MarkovState> move){
+        //System.out.println("MarkovChain.isMoveWithinConstraints called");
+        return true;
+    }
 
     public abstract MarkovMoveSelector<MarkovState> getMoveSelector();
 

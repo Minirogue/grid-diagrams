@@ -22,21 +22,7 @@ public class CanonicalGridAlgorithm extends MetropolisHastingsMarkovChain<GridDi
 
     @Override
     public GridDiagram copy(GridDiagram originalGridDiagram) {
-        //This method uses the technique of serializing and deserializing from http://javatechniques.com/blog/faster-deep-copies-of-java-objects/
-        GridDiagram newGridDiagram = null;
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutputStream out = new ObjectOutputStream(bos);
-            out.writeObject(originalGridDiagram);
-            out.flush();
-            out.close();
-            ObjectInputStream in = new ObjectInputStream(
-                    new ByteArrayInputStream(bos.toByteArray()));
-            newGridDiagram = (GridDiagram) in.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return newGridDiagram;
+        return originalGridDiagram.copy();
     }
 
     @Override
@@ -44,6 +30,7 @@ public class CanonicalGridAlgorithm extends MetropolisHastingsMarkovChain<GridDi
         int n = gridDiagram.getSize();
         int delta;
         switch ((Integer) move.getMoveData()[0]) {
+            case GridDiagram.MOVETYPE_NONE:
             case GridDiagram.MOVETYPE_COMMUTATION:
                 delta = 0;
                 break;
