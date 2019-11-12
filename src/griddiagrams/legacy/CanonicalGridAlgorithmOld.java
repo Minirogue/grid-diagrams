@@ -1,4 +1,4 @@
-package griddiagrams.markovchain.canonicalalgorithm;//package grid_tools;
+package griddiagrams.legacy;//package grid_tools;
 
 import griddiagrams.GridDiagram;
 

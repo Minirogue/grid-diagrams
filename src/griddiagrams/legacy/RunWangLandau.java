@@ -1,4 +1,4 @@
-package griddiagrams.markovchain.wanglandau.old;//package grid_tools;
+package griddiagrams.legacy;//package grid_tools;
 
 import java.io.PrintWriter;
 import java.io.FileNotFoundException;
@@ -200,7 +200,7 @@ public class RunWangLandau {
             writer.println("Random seed: "+seed);
             writer.println("Minimum size: "+minSize);
             writer.println("Maximum size: "+maxSize);
-            writer.println("griddiagrams.markovchain.wanglandau.old.Energy = "+energyTypeAsString());
+            writer.println("griddiagrams.legacy.Energy = "+energyTypeAsString());
             writer.println("With starting weights from "+ inputWeightsFile);
             writer.println("Saving weights to "+outputFilePath+".wts");
             writer.println("Sampling every "+steps+" steps");
@@ -226,7 +226,7 @@ public class RunWangLandau {
             writer.println("Random seed: "+seed);
             writer.println("Minimum size: "+minSize);
             writer.println("Maximum size: "+maxSize);
-            writer.println("griddiagrams.markovchain.wanglandau.old.Energy = "+energyTypeAsString());
+            writer.println("griddiagrams.legacy.Energy = "+energyTypeAsString());
             writer.println("With starting weights from "+ inputWeightsFile);
             writer.println("Saving samples to "+outputFilePath+".grds");
             writer.println("Sampling every "+steps+" steps");

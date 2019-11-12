@@ -1,4 +1,4 @@
-package griddiagrams.markovchain.wanglandau.old;//package grid_tools;
+package griddiagrams.legacy;//package grid_tools;
 
 import griddiagrams.GridDiagram;
 
@@ -91,7 +91,7 @@ public class WangLandau {
 
 	/**
 	*	Get the current weights being used by this instance of Wang-Landau.
-	*	The weights are stored in a HashMap<griddiagrams.markovchain.wanglandau.old.Energy,Double>
+	*	The weights are stored in a HashMap<griddiagrams.legacy.Energy,Double>
 	*	@return Wang-Landau weights
 	*/
 	public HashMap<Energy, Double> getWeights(){ return weights; }
@@ -187,14 +187,14 @@ public class WangLandau {
 	public GridDiagram getGridDiagram(){ return gDiagram; }
 
 	/**
-	*	Transfer griddiagrams.markovchain.wanglandau.old.Energy object in nextEnergy to currentEnergy.
+	*	Transfer griddiagrams.legacy.Energy object in nextEnergy to currentEnergy.
 	*	This should be done after a move is successfully performed.
 	*/
 	protected void updateCurrentEnergyFromNext(){
 		currentEnergy = nextEnergy;
 	}
 	/**
-	*	Set currentEnergy to an griddiagrams.markovchain.wanglandau.old.Energy object calculated from the current grid diagram.
+	*	Set currentEnergy to an griddiagrams.legacy.Energy object calculated from the current grid diagram.
 	*/
 	public void calcAndSetCurrentEnergy(){
 		currentEnergy = new Energy(gDiagram);
@@ -514,16 +514,16 @@ public class WangLandau {
 							}
 							break;
 						default:
-							System.err.print("Invalid Grid Move [griddiagrams.markovchain.wanglandau.old.WangLandau:run()]");
+							System.err.print("Invalid Grid Move [griddiagrams.legacy.WangLandau:run()]");
 							System.exit(1);
 							break;
 					}
 				//}
 				//Uncomment the following block to debug energy change calculations
-				/*if (!currentEnergy.equals(new griddiagrams.markovchain.wanglandau.old.Energy(gDiagram))){
+				/*if (!currentEnergy.equals(new griddiagrams.legacy.Energy(gDiagram))){
 					System.err.println("error in energy: "+currentEnergy);
 					System.err.println(currentEnergy);
-					System.err.println(new griddiagrams.markovchain.wanglandau.old.Energy(gDiagram));
+					System.err.println(new griddiagrams.legacy.Energy(gDiagram));
 					System.err.println(movetype);
 					System.err.println(gDiagram);
 					System.exit(1);
