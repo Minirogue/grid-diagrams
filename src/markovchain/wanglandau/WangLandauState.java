@@ -15,15 +15,17 @@ public class WangLandauState<MarkovState> {
         return state;
     }
 
+/*
     public void setState(MarkovState state) {
         this.state = state;
     }
+*/
 
     public WangLandauEnergy<MarkovState, ?> getEnergy() {
         return energy;
     }
 
-    public void setEnergy(WangLandauEnergy<MarkovState, ?> energy) {
+   /* public void setEnergy(WangLandauEnergy<MarkovState, ?> energy) {
         this.energy = energy;
-    }
+    }*/
 }

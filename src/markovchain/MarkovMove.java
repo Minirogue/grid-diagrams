@@ -10,18 +10,18 @@ public interface MarkovMove<MarkovState> {
      * Performs the move represented by the MarkovMove object.
      * @return The state resulting from performing the move.
      */
-    public MarkovState perform();
+    MarkovState perform();
 
     /**
      *
      * @return Data describing the move defined by this object.
      */
-    public Object[] getMoveData();
+    Object[] getMoveData();
 
     /**
      *
      * @return The state that this move will be performed on.
      */
-    public MarkovState getStartingState();
+    MarkovState getStartingState();
 
 }
