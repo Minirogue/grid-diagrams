@@ -45,7 +45,7 @@ public abstract class MarkovChain<MarkovState> {
     public List<MarkovState> sample(int numSamples, int sampleFrequency, MarkovState state) {
         List<MarkovState> sampleList = new ArrayList<>();
         for (int t = 0; t < numSamples; t++) {
-            run(sampleFrequency, state);
+            state = run(sampleFrequency, state);
             sampleList.add(copy(state));
         }
         return sampleList;
