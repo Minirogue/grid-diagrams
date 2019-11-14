@@ -3,49 +3,55 @@ package griddiagrams.markovchain.wanglandau;
 import griddiagrams.GridDiagram;
 import griddiagrams.markovchain.GridMove;
 import griddiagrams.markovchain.GridMoveSelector;
-import markovchain.MarkovMove;
 import markovchain.MarkovMoveSelector;
 import markovchain.wanglandau.WangLandauMarkovChain;
-import markovchain.wanglandau.WangLandauState;
 import markovchain.wanglandau.energy.WangLandauEnergy;
 
 import java.util.HashMap;
 
-public class GridDiagramWangLandau extends WangLandauMarkovChain<GridDiagram> {
+public class GridDiagramWangLandau<E extends WangLandauEnergy<GridDiagram, GridMove, E>> extends WangLandauMarkovChain<GridDiagram, GridMove, E> {
 
-    private MarkovMoveSelector<GridDiagram> markovMoveSelector = new GridMoveSelector();
-    private WangLandauEnergy.EnergyFactory<GridDiagram, ?> energyFactory = new SizeEnergy.SizeEnergyFactory();
+    private MarkovMoveSelector<GridDiagram, GridMove> markovMoveSelector = new GridMoveSelector();
+    private WangLandauEnergy.Factory<GridDiagram, GridMove, E> energyFactory;
+    private int maxSize;
+
+    public GridDiagramWangLandau(int maxSize, WangLandauEnergy.Factory<GridDiagram, GridMove, E> energyFactory){
+        this.maxSize = maxSize;
+        this.energyFactory = energyFactory;
+    }
 
     @Override
-    public MarkovMoveSelector<GridDiagram> getMarkovStateMoveSelector() {
+    public MarkovMoveSelector<GridDiagram, GridMove> getMarkovStateMoveSelector() {
         return markovMoveSelector;
     }
 
     @Override
-    public WangLandauEnergy.EnergyFactory<GridDiagram, ?> getEnergyFactory() {
+    public WangLandauEnergy.Factory<GridDiagram,GridMove, E> getEnergyFactory() {
         return energyFactory;
     }
 
     @Override
-    public double getAcceptanceProbability(WangLandauState<GridDiagram> wangLandauState, MarkovMove<WangLandauState<GridDiagram>> move) {
+    public double getAcceptanceAdjustment(GridMove move) {
         double adjustment = 1.0;
-        switch ((int) move.getMoveData()[0]) {
+        int currentGridSize = move.getGridFromBeforeMove().getSize();
+        switch (move.getMoveType()) {
             case GridDiagram.MOVETYPE_STABILIZATION:
-                adjustment = 2.0 * wangLandauState.getState().getSize();
+                adjustment = 2.0 * currentGridSize;
                 break;
             case GridDiagram.MOVETYPE_DESTABILIZATION:
-                adjustment = 1.0 / (2.0 * (wangLandauState.getState().getSize() - 1));
+                adjustment = 1.0 / (2.0 * (currentGridSize - 1));
                 break;
         }
-        return super.getAcceptanceProbability(wangLandauState, move) * adjustment;
+        return adjustment;
     }
+
 
     @Override
     public boolean isTrainingOver() {
-        HashMap<WangLandauEnergy<GridDiagram, ?>, Integer> histogram = getHistogram();
+        HashMap<E, Integer> histogram = getHistogram();
         //System.out.println("isTrainingOver called");
         //System.out.println(getHistogram().toString());
-        for (WangLandauEnergy<GridDiagram, ?> key : histogram.keySet()) {
+        for (E key : histogram.keySet()) {
             //System.out.println(key.toString()+" "+histogram.get(key));
             if (histogram.get(key) < 10000) {
                 return false;
@@ -55,13 +61,12 @@ public class GridDiagramWangLandau extends WangLandauMarkovChain<GridDiagram> {
     }
 
     @Override
-    public boolean isMoveWithinConstraints(WangLandauState<GridDiagram> gridDiagramWangLandauState, MarkovMove<WangLandauState<GridDiagram>> move) {
-        //System.out.println("GridDiagramWangLandau.isMoveWithinConstraints called");
-        return (gridDiagramWangLandauState.getState().getSize() <= 10 || (int) move.getMoveData()[0] != GridDiagram.MOVETYPE_STABILIZATION);//TODO implement more broadly
+    public boolean isMarkovMoveMoveWithinConstraints(GridMove move) {
+        return (move.getGridFromBeforeMove().getSize() <= maxSize || move.getMoveType() != GridDiagram.MOVETYPE_STABILIZATION);
     }
 
     @Override
-    public GridDiagram copyState(GridDiagram gridDiagram) {
+    public GridDiagram deepCopyMarkovState(GridDiagram gridDiagram) {
         return gridDiagram.copy();
     }
 }

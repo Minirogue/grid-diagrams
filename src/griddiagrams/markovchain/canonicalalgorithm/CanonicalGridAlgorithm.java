@@ -1,35 +1,34 @@
 package griddiagrams.markovchain.canonicalalgorithm;
 
 import griddiagrams.GridDiagram;
+import griddiagrams.markovchain.GridMove;
 import griddiagrams.markovchain.GridMoveSelector;
-import markovchain.MarkovMove;
 import markovchain.MarkovMoveSelector;
 import markovchain.metropolishastings.MetropolisHastingsMarkovChain;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CanonicalGridAlgorithm extends MetropolisHastingsMarkovChain<GridDiagram> {
+public class CanonicalGridAlgorithm extends MetropolisHastingsMarkovChain<GridDiagram, GridMove> {
 
-    private double z = 1;
+    private double z;
     private List<Double[]> probabilities = new ArrayList<>();
-    private MarkovMoveSelector<GridDiagram> moveSelector = new GridMoveSelector();
+    private MarkovMoveSelector<GridDiagram, GridMove> moveSelector = new GridMoveSelector();
 
     public CanonicalGridAlgorithm(double z) {
         this.z = z;
     }
 
     @Override
-    public GridDiagram copy(GridDiagram originalGridDiagram) {
+    public GridDiagram deepCopy(GridDiagram originalGridDiagram) {
         return originalGridDiagram.copy();
     }
 
     @Override
-    public double getAcceptanceProbability(GridDiagram gridDiagram, MarkovMove<GridDiagram> move) {
-        int n = gridDiagram.getSize();
+    public double getAcceptanceProbability(GridMove move) {
+        int n = move.getGridFromBeforeMove().getSize();
         int delta;
-        switch ((Integer) move.getMoveData()[0]) {
+        switch (move.getMoveType()) {
             case GridDiagram.MOVETYPE_NONE:
             case GridDiagram.MOVETYPE_COMMUTATION:
                 delta = 0;
@@ -51,7 +50,7 @@ public class CanonicalGridAlgorithm extends MetropolisHastingsMarkovChain<GridDi
     }
 
     @Override
-    public MarkovMoveSelector<GridDiagram> getMoveSelector() {
+    public MarkovMoveSelector<GridDiagram, GridMove> getMoveSelector() {
         return moveSelector;
     }
 

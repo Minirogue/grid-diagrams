@@ -1,11 +1,10 @@
 package griddiagrams.markovchain.wanglandau;
 
 import griddiagrams.GridDiagram;
-import markovchain.MarkovMove;
-import markovchain.wanglandau.WangLandauState;
+import griddiagrams.markovchain.GridMove;
 import markovchain.wanglandau.energy.WangLandauEnergy;
 
-public class SizeEnergy extends WangLandauEnergy<GridDiagram, SizeEnergy> {
+public class SizeEnergy extends WangLandauEnergy<GridDiagram, GridMove, SizeEnergy> {
 
     private int gridSize;
 
@@ -17,9 +16,15 @@ public class SizeEnergy extends WangLandauEnergy<GridDiagram, SizeEnergy> {
         return gridSize;
     }
 
+
     @Override
-    public SizeEnergy nextEnergyFromMove(GridDiagram gridDiagram, MarkovMove<GridDiagram> moveToNextState) {
-        switch ((int) moveToNextState.getMoveData()[0]) {
+    public SizeEnergy copy() {
+        return new SizeEnergy(gridSize);
+    }
+
+    @Override
+    public SizeEnergy getNextEnergyFromMove(GridMove moveToNextState) {
+        switch (moveToNextState.getMoveType()) {
             case GridDiagram.MOVETYPE_NONE:
             case GridDiagram.MOVETYPE_COMMUTATION:
                 return new SizeEnergy(getSize());
@@ -31,11 +36,6 @@ public class SizeEnergy extends WangLandauEnergy<GridDiagram, SizeEnergy> {
                 System.err.println("Error in SizeEnergy.nextEnergyFromMove(), type not found");
                 return new SizeEnergy(-1);
         }
-    }
-
-    @Override
-    public SizeEnergy copy() {
-        return new SizeEnergy(gridSize);
     }
 
     @Override
@@ -57,10 +57,12 @@ public class SizeEnergy extends WangLandauEnergy<GridDiagram, SizeEnergy> {
         return Integer.toString(getSize());
     }
 
-    public static class SizeEnergyFactory extends EnergyFactory<GridDiagram, SizeEnergy> {
+    public static class SizeEnergyFactory extends Factory<GridDiagram, GridMove, SizeEnergy> {
         @Override
         public SizeEnergy getEnergyFromState(GridDiagram gridDiagram) {
             return new SizeEnergy(gridDiagram.getSize());
         }
+
+
     }
 }

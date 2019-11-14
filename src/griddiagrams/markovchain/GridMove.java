@@ -5,84 +5,112 @@ import markovchain.MarkovMove;
 
 public class GridMove implements MarkovMove<GridDiagram> {
 
-    private GridDiagram startingDiagram;
-    private int moveType;
-    private int fourTimesVertex;
-    private int insertedVertex;
+    private static int[] stabSubTypes = new int[]{GridDiagram.INSERT_XO_COLUMN, GridDiagram.INSERT_OX_COLUMN, GridDiagram.INSERT_XO_ROW, GridDiagram.INSERT_OX_ROW};
 
-    public GridMove(GridDiagram startingDiagram, int moveType, int fourTimesVertex, int insertedVertex) {
-        this.startingDiagram = startingDiagram;
+    private GridDiagram initialGrid;
+    private int moveType;
+    private int moveSubType;
+    private int rowOrColumnIndex;
+    private int insertedLocation;
+    private int[] arguments;
+
+    public GridMove(GridDiagram initialGrid, int moveType, int fourTimesRowColIndex, int insertedLocation) {
+        this.initialGrid = initialGrid;
         this.moveType = moveType;
-        this.fourTimesVertex = fourTimesVertex;
-        this.insertedVertex = insertedVertex;
-        if (!isValid()){
+        this.rowOrColumnIndex = fourTimesRowColIndex / 4;
+        switch (moveType) {
+            case GridDiagram.MOVETYPE_DESTABILIZATION:
+            case GridDiagram.MOVETYPE_COMMUTATION:
+                this.moveSubType = fourTimesRowColIndex % 2 == 0 ? GridDiagram.MOVE_SUBTYPE_ROW : GridDiagram.MOVE_SUBTYPE_COLUMN;
+                this.arguments = new int[]{rowOrColumnIndex, moveSubType};
+                break;
+            case GridDiagram.MOVETYPE_STABILIZATION:
+                this.moveSubType = stabSubTypes[fourTimesRowColIndex % 4];
+                this.insertedLocation = insertedLocation;
+                this.arguments = new int[]{rowOrColumnIndex, insertedLocation, moveSubType};
+                break;
+            case GridDiagram.MOVETYPE_NONE:
+            default:
+                this.arguments = new int[]{};
+                break;
+        }
+        if (!isValid()) {
             this.moveType = GridDiagram.MOVETYPE_NONE;
         }
+
     }
 
     public boolean isValid() {
         switch (moveType) {
             case GridDiagram.MOVETYPE_COMMUTATION:
-                if (fourTimesVertex % 2 == 0) {
-                    return startingDiagram.isCommuteRowValid(fourTimesVertex / 4);
-                } else {
-                    return startingDiagram.isCommuteColValid(fourTimesVertex / 4);
+                if (moveSubType == GridDiagram.MOVE_SUBTYPE_ROW) {
+                    return initialGrid.isCommuteRowValid(rowOrColumnIndex);
+                } else if (moveSubType == GridDiagram.MOVE_SUBTYPE_COLUMN) {
+                    return initialGrid.isCommuteColValid(rowOrColumnIndex);
                 }
+                break;
             case GridDiagram.MOVETYPE_DESTABILIZATION:
-                if (fourTimesVertex % 2 == 0) {
-                    return startingDiagram.isDestabilizeRowValid(fourTimesVertex / 4);
-                } else{
-                    return startingDiagram.isDestabilizeColValid(fourTimesVertex / 4);
+                if (moveSubType == GridDiagram.MOVE_SUBTYPE_ROW) {
+                    return initialGrid.isDestabilizeRowValid(rowOrColumnIndex);
+                } else if (moveSubType == GridDiagram.MOVE_SUBTYPE_COLUMN) {
+                    return initialGrid.isDestabilizeColValid(rowOrColumnIndex);
                 }
+                break;
+            case GridDiagram.MOVETYPE_NONE:
             case GridDiagram.MOVETYPE_STABILIZATION:
                 return true;
             default:
                 return false;
         }
+        System.err.println("Error in GridMove.isValid()");
+        return false;
     }
 
     @Override
     public GridDiagram perform() {
+        //This implementation does not check the validity of each move, as that is taken care of when the constructor calls isValid()
         switch (moveType) {
             case GridDiagram.MOVETYPE_NONE:
                 break;
             case GridDiagram.MOVETYPE_COMMUTATION:
-                if (fourTimesVertex % 2 == 0) {
-                    startingDiagram.commuteRowIfValid(fourTimesVertex / 4);
-                } else {
-                    startingDiagram.commuteColIfValid(fourTimesVertex / 4);
+                if (moveSubType == GridDiagram.MOVE_SUBTYPE_ROW) {
+                    initialGrid.commuteRow(rowOrColumnIndex);
+                } else if (moveSubType == GridDiagram.MOVE_SUBTYPE_COLUMN) {
+                    initialGrid.commuteCol(rowOrColumnIndex);
                 }
                 break;
             case GridDiagram.MOVETYPE_DESTABILIZATION:
-                if (fourTimesVertex % 2 == 0 && startingDiagram.isDestabilizeRowValid(fourTimesVertex / 4)) {
-                    startingDiagram.destabilizeRow(fourTimesVertex / 4);
-                } else if (fourTimesVertex % 2 == 1 && startingDiagram.isDestabilizeColValid(fourTimesVertex / 4)) {
-                    startingDiagram.destabilizeCol(fourTimesVertex / 4);
+                if (moveSubType == GridDiagram.MOVE_SUBTYPE_ROW) {
+                    initialGrid.destabilizeRow(rowOrColumnIndex);
+                } else if (moveSubType == GridDiagram.MOVE_SUBTYPE_COLUMN) {
+                    initialGrid.destabilizeCol(rowOrColumnIndex);
                 }
                 break;
             case GridDiagram.MOVETYPE_STABILIZATION:
-                switch (fourTimesVertex % 4) {
+                switch (moveSubType) {
                     case GridDiagram.INSERT_XO_COLUMN:
                     case GridDiagram.INSERT_OX_COLUMN:
-                        startingDiagram.stabilize(fourTimesVertex / 4, insertedVertex, fourTimesVertex % 4);
+                        initialGrid.stabilize(rowOrColumnIndex, insertedLocation, moveSubType);
                         break;
                     case GridDiagram.INSERT_XO_ROW:
                     case GridDiagram.INSERT_OX_ROW:
-                        startingDiagram.stabilize(insertedVertex, fourTimesVertex / 4, fourTimesVertex % 4);
+                        initialGrid.stabilize(insertedLocation, rowOrColumnIndex, moveSubType);
                         break;
                 }
                 break;
         }
-        return startingDiagram;
+        return initialGrid;
     }
 
-    @Override
-    public Object[] getMoveData() {
-        return new Integer[]{moveType, fourTimesVertex, insertedVertex};
+    public int getMoveType() {
+        return moveType;
     }
 
-    @Override
-    public GridDiagram getStartingState() {
-        return startingDiagram;
+    public int[] getMoveArguments() {
+        return arguments;
+    }
+
+    public GridDiagram getGridFromBeforeMove() {
+        return initialGrid;
     }
 }

@@ -4,9 +4,9 @@ import griddiagrams.GridDiagram;
 import markovchain.MarkovMove;
 import markovchain.MarkovMoveSelector;
 
-public class GridMoveSelector implements MarkovMoveSelector<GridDiagram> {
+public class GridMoveSelector implements MarkovMoveSelector<GridDiagram, GridMove> {
     @Override
-    public MarkovMove<GridDiagram> getRandomMove(GridDiagram gridDiagram) {
+    public GridMove getRandomMove(GridDiagram gridDiagram) {
         int moveType = (int) (Math.random() * (3));
         int vertex = (int) (Math.random() * gridDiagram.getSize() * 4);
         int insertedVertex = 0;

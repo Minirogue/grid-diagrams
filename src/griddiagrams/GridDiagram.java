@@ -71,14 +71,15 @@ public class GridDiagram implements Serializable {
             ObjectInputStream inObj = new ObjectInputStream(inFile);
             GridDiagram diagramFromFile = (GridDiagram) inObj.readObject();
             inObj.close();
-            inFile.close();
+            if (inFile != null) {
+                inFile.close();
+            }
             rows = diagramFromFile.getRows();
             cols = diagramFromFile.getCols();
             size = diagramFromFile.getSize();
         } catch (FileNotFoundException e) {
             System.err.println("File not found");
         } catch (IOException e) {
-            //System.out.println("Error initializing input stream");
             System.err.println(e);
         } catch (ClassNotFoundException e) {
             System.err.println("File not correctly formatted");
@@ -140,8 +141,8 @@ public class GridDiagram implements Serializable {
      * Converts a grid diagram to its mirror image.then returns itself..
      */
     public GridDiagram mirror() {
-        ArrayList<Row> newRows = new ArrayList();
-        ArrayList<Column> newCol = new ArrayList();
+        ArrayList<Row> newRows = new ArrayList<>();
+        ArrayList<Column> newCol = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             newCol.add(getCol(size - 1 - i));
             newRows.add(new Row(size - getRow(i).getXCol() - 1, size - getRow(i).getOCol() - 1));
@@ -164,7 +165,7 @@ public class GridDiagram implements Serializable {
      * @param i the column to return, counting from the left starting at 0
      * @return a Column object representing column i
      */
-    public Column getCol(int i) {
+    private Column getCol(int i) {
         return cols.get(i);
     }
 
@@ -309,65 +310,65 @@ public class GridDiagram implements Serializable {
         cols = newCols;
     }
 
-    public void stabilize(int rownumber, int colnumber, int type) {
+    public void stabilize(int rowNumber, int colNumber, int type) {
         Row thisRow;
-        for (int i = rownumber; i < size; i++) {
+        for (int i = rowNumber; i < size; i++) {
             thisRow = rows.get(i);
             cols.get(thisRow.getXCol()).setXRow(i + 1);
             cols.get(thisRow.getOCol()).setORow(i + 1);
         }
         Row newRow = new Row(-1, -1);
-        rows.add(rownumber, newRow);
+        rows.add(rowNumber, newRow);
         Column thisCol;
-        for (int j = colnumber; j < size; j++) {
+        for (int j = colNumber; j < size; j++) {
             thisCol = cols.get(j);
             rows.get(thisCol.getXRow()).setXCol(j + 1);
             rows.get(thisCol.getORow()).setOCol(j + 1);
         }
         Column newCol = new Column(-1, -1);
-        cols.add(colnumber, newCol);
+        cols.add(colNumber, newCol);
         //size++;
         //printToTerminal();
         switch (type) {
             case INSERT_XO_COLUMN:
-                thisRow = rows.get(rownumber + 1);
+                thisRow = rows.get(rowNumber + 1);
                 thisCol = cols.get(thisRow.getOCol());
-                newCol.setXRow(rownumber);
-                newCol.setORow(rownumber + 1);
-                thisCol.setORow(rownumber);
-                newRow.setXCol(colnumber);
+                newCol.setXRow(rowNumber);
+                newCol.setORow(rowNumber + 1);
+                thisCol.setORow(rowNumber);
+                newRow.setXCol(colNumber);
                 newRow.setOCol(thisRow.getOCol());
-                thisRow.setOCol(colnumber);
+                thisRow.setOCol(colNumber);
                 break;
             case INSERT_OX_COLUMN:
-                thisRow = rows.get(rownumber + 1);
+                thisRow = rows.get(rowNumber + 1);
                 thisCol = cols.get(thisRow.getXCol());
-                newCol.setXRow(rownumber + 1);
-                newCol.setORow(rownumber);
-                thisCol.setXRow(rownumber);
+                newCol.setXRow(rowNumber + 1);
+                newCol.setORow(rowNumber);
+                thisCol.setXRow(rowNumber);
                 newRow.setXCol(thisRow.getXCol());
-                newRow.setOCol(colnumber);
-                thisRow.setXCol(colnumber);
+                newRow.setOCol(colNumber);
+                thisRow.setXCol(colNumber);
                 break;
             case INSERT_XO_ROW:
-                thisCol = cols.get(colnumber + 1);
+                thisCol = cols.get(colNumber + 1);
                 thisRow = rows.get(thisCol.getORow());
-                newRow.setXCol(colnumber);
-                newRow.setOCol(colnumber + 1);
-                thisRow.setOCol(colnumber);
-                newCol.setXRow(rownumber);
+                newRow.setXCol(colNumber);
+                newRow.setOCol(colNumber + 1);
+                thisRow.setOCol(colNumber);
+                newCol.setXRow(rowNumber);
                 newCol.setORow(thisCol.getORow());
-                thisCol.setORow(rownumber);
+                thisCol.setORow(rowNumber);
                 break;
             case INSERT_OX_ROW:
-                thisCol = cols.get(colnumber + 1);
+                thisCol = cols.get(colNumber + 1);
                 thisRow = rows.get(thisCol.getXRow());
-                newRow.setXCol(colnumber + 1);
-                newRow.setOCol(colnumber);
-                thisRow.setXCol(colnumber);
+                newRow.setXCol(colNumber + 1);
+                newRow.setOCol(colNumber);
+                thisRow.setXCol(colNumber);
                 newCol.setXRow(thisCol.getXRow());
-                newCol.setORow(rownumber);
-                thisCol.setXRow(rownumber);
+                newCol.setORow(rowNumber);
+                thisCol.setXRow(rowNumber);
                 break;
             default:
                 break;
@@ -507,6 +508,8 @@ public class GridDiagram implements Serializable {
         //System.out.println("deltawrithe called");
         int delta = 0;
         switch (movetype) {
+            case MOVETYPE_NONE:
+                return 0;
             case MOVETYPE_COMMUTATION:
                 //System.out.println("commutation");
                 return commuteDeltaWrithe(arguments);
@@ -630,7 +633,11 @@ public class GridDiagram implements Serializable {
         return new int[][]{xCol, oCol};
     }
 
-    //[rowcol, roworcol]
+    /**
+     *
+     * @param arguments An integer array where arguments[1] is MOVE_SUBTYPE_COLUMN or MOVE_SUBTYPE_ROW and arguments[0] is the row/column where the move is being performed
+     * @return The amount that the writhe will change if the proposed move is performed
+     */
     private int commuteDeltaWrithe(int[] arguments) {
         int delta = 0;
         if (arguments[1] == MOVE_SUBTYPE_COLUMN) {
@@ -756,11 +763,11 @@ public class GridDiagram implements Serializable {
             return oCol;
         }
 
-        public int getMinCol() {
+        int getMinCol() {
             return minCol;
         }
 
-        public int getMaxCol() {
+        int getMaxCol() {
             return maxCol;
         }
 
@@ -772,12 +779,12 @@ public class GridDiagram implements Serializable {
             return length;
         }
 
-        public void setXCol(int newXCol) {
+        void setXCol(int newXCol) {
             this.xCol = newXCol;
             setMinAndMax();
         }
 
-        public void setOCol(int newOCol) {
+        void setOCol(int newOCol) {
             this.oCol = newOCol;
             setMinAndMax();
         }
@@ -886,19 +893,19 @@ public class GridDiagram implements Serializable {
             return "X: " + xRow + " O: " + oRow;
         }
 
-        public int getXRow() {
+        int getXRow() {
             return xRow;
         }
 
-        public int getORow() {
+        int getORow() {
             return oRow;
         }
 
-        public int getMinRow() {
+        int getMinRow() {
             return minRow;
         }
 
-        public int getMaxRow() {
+        int getMaxRow() {
             return maxRow;
         }
 
@@ -910,12 +917,12 @@ public class GridDiagram implements Serializable {
             return length;
         }
 
-        public void setXRow(int newXRow) {
+        void setXRow(int newXRow) {
             xRow = newXRow;
             setMaxAndMin();
         }
 
-        public void setORow(int newORow) {
+        void setORow(int newORow) {
             oRow = newORow;
             setMaxAndMin();
         }
