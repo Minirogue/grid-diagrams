@@ -7,87 +7,77 @@ import markovchain.wanglandau.energy.WangLandauEnergy;
 
 import java.util.HashMap;
 
-public abstract class WangLandauMarkovChain<MarkovState> extends MetropolisHastingsMarkovChain<WangLandauState<MarkovState>> {
+public abstract class WangLandauMarkovChain<MarkovState, MM extends MarkovMove<MarkovState>, E extends WangLandauEnergy<MarkovState,MM, E>> extends MetropolisHastingsMarkovChain<WangLandauState<MarkovState, E>, WangLandauMove<MarkovState,MM,E>> {
 
-    private HashMap<WangLandauEnergy<MarkovState, ?>, Double> logWeights = new HashMap<>();
-    private HashMap<WangLandauEnergy<MarkovState, ?>, Integer> histogram = new HashMap<>();
+    private HashMap<E, Double> logWeights = new HashMap<>();
+    private HashMap<E, Integer> histogram = new HashMap<>();
+    private MarkovMoveSelector<WangLandauState<MarkovState, E>, WangLandauMove<MarkovState,MM,E>> wangLandauMoveSelector = wangLandauState -> new WangLandauMove<>(wangLandauState, getMarkovStateMoveSelector().getRandomMove(wangLandauState.getState()));
 
-    public HashMap<WangLandauEnergy<MarkovState, ?>, Double> train(MarkovState state, int updateFrequency, double logUpdateFactor) {
-        WangLandauState<MarkovState> wangLandauState = new WangLandauState<>(state, getEnergyFactory().getEnergyFromState(state));
-        updateWeight(wangLandauState.getEnergy(), 0);;
+    public HashMap<E, Double> train(MarkovState state, HashMap<E, Double> logWeights, int updateFrequency, double logUpdateFactor) {
+        if (logWeights != null){
+            this.logWeights = logWeights;
+        }else {
+            this.logWeights = new HashMap<>();
+        }
+        WangLandauState<MarkovState, E> wangLandauState = new WangLandauState<>(state, getEnergyFactory().getEnergyFromState(state));
+        updateWeight(wangLandauState.getEnergy(), 0);
         while (!isTrainingOver()) {
             wangLandauState = run(updateFrequency, wangLandauState);
-            //System.out.println(wangLandauState.getState().toString());
             updateWeight(wangLandauState.getEnergy(), logUpdateFactor);
         }
-        return getLogWeights();
+        return getLogWeights();//TODO this.logweights might be left unclean here.
     }
 
 
     @Override
-    public double getAcceptanceProbability(WangLandauState<MarkovState> wangLandauState, MarkovMove<WangLandauState<MarkovState>> move) {
-        return Math.exp(logWeights.getOrDefault(wangLandauState.getEnergy(), 0.0) - logWeights.getOrDefault(((WangLandauMove) move).getNextEnergy(), 0.0));
+    public double getAcceptanceProbability(WangLandauMove<MarkovState, MM, E> move) {
+        double logDiff = logWeights.getOrDefault(move.getCurrentEnergy(), 0.0) - logWeights.getOrDefault(move.getNextEnergy(), 0.0);
+        logDiff += Math.log(getAcceptanceAdjustment(move.getMarkovMove()));
+        if (logDiff >= 0){ //Avoid math overflow errors from trying to exponentiate large numbers
+            return 1;
+        } else {
+            return Math.exp(logDiff);
+        }
     }
 
-    protected HashMap<WangLandauEnergy<MarkovState, ?>, Double> getLogWeights() {
+    protected HashMap<E, Double> getLogWeights() {
         return logWeights;
     }
-    public HashMap<WangLandauEnergy<MarkovState, ?>, Integer> getHistogram() {
+    protected HashMap<E, Integer> getHistogram() {
         return histogram;
     }
 
-    private void updateWeight(WangLandauEnergy<MarkovState, ?> energy, double logUpdateFactor) {
+    private void updateWeight(E energy, double logUpdateFactor) {
         logWeights.put(energy, logWeights.getOrDefault(energy, 0.0) + logUpdateFactor);
         histogram.put(energy, histogram.getOrDefault(energy, 0)+1);
     }
 
-    class WangLandauMove implements MarkovMove<WangLandauState<MarkovState>> {
-
-        private WangLandauState<MarkovState> startingState;
-        private MarkovMove<MarkovState> markovMove;
-        private WangLandauEnergy<MarkovState, ?> nextEnergy;
-
-        WangLandauMove(WangLandauState<MarkovState> wangLandauState, MarkovMove<MarkovState> markovMove) {
-            this.startingState = wangLandauState;
-            this.markovMove = markovMove;
-            nextEnergy = wangLandauState.getEnergy().nextEnergyFromMove(wangLandauState.getState(), markovMove);
-        }
-
-        WangLandauEnergy<MarkovState, ?> getNextEnergy() {
-            return nextEnergy;
-        }
-
-        @Override
-        public WangLandauState<MarkovState> perform() {
-            return new WangLandauState<>(markovMove.perform(), nextEnergy);
-        }
-
-        @Override
-        public Object[] getMoveData() {
-            return markovMove.getMoveData();
-        }
-
-        @Override
-        public WangLandauState<MarkovState> getStartingState() {
-            return startingState;
-        }
+    @Override
+    public MarkovMoveSelector<WangLandauState<MarkovState, E>, WangLandauMove<MarkovState,MM,E>> getMoveSelector() {
+        return wangLandauMoveSelector;
     }
 
     @Override
-    public MarkovMoveSelector<WangLandauState<MarkovState>> getMoveSelector() {
-        return wangLandauState -> new WangLandauMove(wangLandauState, getMarkovStateMoveSelector().getRandomMove(wangLandauState.getState()));
+    public WangLandauState<MarkovState, E> deepCopy(WangLandauState<MarkovState, E> wangLandauState) {
+        return new WangLandauState<>(deepCopyMarkovState(wangLandauState.getState()), wangLandauState.getEnergy().copy());
     }
 
     @Override
-    public WangLandauState<MarkovState> copy(WangLandauState<MarkovState> wangLandauState) {
-        return new WangLandauState<>(copyState(wangLandauState.getState()), wangLandauState.getEnergy().copy());
+    public boolean isMoveWithinConstraints(WangLandauMove<MarkovState, MM, E> move) {
+        return isMarkovMoveMoveWithinConstraints(move.getMarkovMove());
+    }
+    public abstract boolean isMarkovMoveMoveWithinConstraints(MM move);
+
+
+    public double getAcceptanceAdjustment(MM move){
+        return 1.0;
     }
 
-    public abstract MarkovState copyState(MarkovState markovState);
+    public abstract MarkovState deepCopyMarkovState(MarkovState markovState);
 
-    public abstract MarkovMoveSelector<MarkovState> getMarkovStateMoveSelector();
+    public abstract MarkovMoveSelector<MarkovState, MM> getMarkovStateMoveSelector();
 
-    public abstract WangLandauEnergy.EnergyFactory<MarkovState, ?> getEnergyFactory();
+    public abstract WangLandauEnergy.Factory<MarkovState,MM,E> getEnergyFactory();
 
     public abstract boolean isTrainingOver();
 }

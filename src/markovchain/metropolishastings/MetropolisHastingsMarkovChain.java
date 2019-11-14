@@ -3,18 +3,18 @@ package markovchain.metropolishastings;
 import markovchain.MarkovChain;
 import markovchain.MarkovMove;
 
-public abstract class MetropolisHastingsMarkovChain<MarkovState> extends MarkovChain<MarkovState> {
+public abstract class MetropolisHastingsMarkovChain<MarkovState, MM extends MarkovMove<MarkovState>> extends MarkovChain<MarkovState, MM> {
 
 
     @Override
     public MarkovState step(MarkovState markovState) {
-        MarkovMove<MarkovState> move = getMoveSelector().getRandomMove(markovState);
-        if (isMoveWithinConstraints(markovState, move) && Math.random() < getAcceptanceProbability(markovState, move)){
+        MM move = getMoveSelector().getRandomMove(markovState);
+        if (isMoveWithinConstraints(move) && Math.random() < getAcceptanceProbability(move)){
             return move.perform();
         }else{
             return markovState;
         }
     }
 
-    public abstract double getAcceptanceProbability(MarkovState markovState, MarkovMove<MarkovState> move);
+    public abstract double getAcceptanceProbability(MM move);
 }

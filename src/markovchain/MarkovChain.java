@@ -3,7 +3,7 @@ package markovchain;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class MarkovChain<MarkovState> {
+public abstract class MarkovChain<MarkovState, MM extends MarkovMove<MarkovState>> {
 
     /**
      * Perform several steps in the Markov chain.
@@ -26,8 +26,8 @@ public abstract class MarkovChain<MarkovState> {
      * @return The state that was stepped to.
      */
     public MarkovState step(MarkovState state) {
-        MarkovMove<MarkovState> move = getMoveSelector().getRandomMove(state);
-        if (isMoveWithinConstraints(state, move)){
+        MM move = getMoveSelector().getRandomMove(state);
+        if (isMoveWithinConstraints(move)){
             return move.perform();
         }else {
             return state;
@@ -46,7 +46,7 @@ public abstract class MarkovChain<MarkovState> {
         List<MarkovState> sampleList = new ArrayList<>();
         for (int t = 0; t < numSamples; t++) {
             state = run(sampleFrequency, state);
-            sampleList.add(copy(state));
+            sampleList.add(deepCopy(state));
         }
         return sampleList;
     }
@@ -58,20 +58,19 @@ public abstract class MarkovChain<MarkovState> {
      * @param state The state to produce a copy of.
      * @return A copy of the given state with no references to the original object.
      */
-    public abstract MarkovState copy(MarkovState state);
+    public abstract MarkovState deepCopy(MarkovState state);
 
     /**
      * Override this method to impose constraints on the state space.
      *
-     * @param state The current state from which the move is being proposed.
      * @param move The move being proposed.
      * @return true if the proposed move is allowed, false if it is not.
      */
-    public boolean isMoveWithinConstraints(MarkovState state, MarkovMove<MarkovState> move){
+    public boolean isMoveWithinConstraints(MM move){
         //System.out.println("MarkovChain.isMoveWithinConstraints called");
         return true;
     }
 
-    public abstract MarkovMoveSelector<MarkovState> getMoveSelector();
+    public abstract MarkovMoveSelector<MarkovState, MM> getMoveSelector();
 
 }

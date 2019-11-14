@@ -6,22 +6,11 @@ package markovchain;
  */
 public interface MarkovMove<MarkovState> {
 
+
     /**
      * Performs the move represented by the MarkovMove object.
      * @return The state resulting from performing the move.
      */
     MarkovState perform();
-
-    /**
-     *
-     * @return Data describing the move defined by this object.
-     */
-    Object[] getMoveData();
-
-    /**
-     *
-     * @return The state that this move will be performed on.
-     */
-    MarkovState getStartingState();
 
 }

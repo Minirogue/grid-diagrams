@@ -1,7 +1,7 @@
 package markovchain;
 
-public interface MarkovMoveSelector<MarkovState> {
+public interface MarkovMoveSelector<MarkovState, MM extends MarkovMove<MarkovState>> {
 
-    MarkovMove<MarkovState> getRandomMove(MarkovState state);
+    MM getRandomMove(MarkovState state);
 
 }
