@@ -1,5 +1,6 @@
 package markovchain.wanglandau;
 
+import markovchain.MarkovChain;
 import markovchain.MarkovMove;
 import markovchain.MarkovMoveSelector;
 import markovchain.metropolishastings.MetropolisHastingsMarkovChain;
@@ -47,7 +48,8 @@ public abstract class WangLandauMarkovChain<MarkovState, MM extends MarkovMove<M
 
 
     /**
-     * Method overriden from {@link super#getAcceptanceProbability(MarkovMove)}
+     * Method overridden from {@link super#getAcceptanceProbability(MM)}.
+     * Calculates probability of accepting a move in the Wang-Landau Markov chain.
      */
     @Override
     public final double getAcceptanceProbability(WangLandauMove<MarkovState, MM, E> move) {
@@ -60,46 +62,96 @@ public abstract class WangLandauMarkovChain<MarkovState, MM extends MarkovMove<M
         }
     }
 
+
+    /**
+     * @return The current Wang-Landau log weights used to determine transitions in the Markov chain. This will change while {@link #train(MarkovState, HashMap, int, double)} is running.
+     */
     protected HashMap<E, Double> getLogWeights() {
         return logWeights;
     }
 
+    /**
+     * @return The current count of times an energy was used to update a weight during training. This might be used by {@link #isTrainingOver()}.
+     */
     protected HashMap<E, Integer> getHistogram() {
         return histogram;
     }
 
+    /**
+     * @param energy          The energy for which the associated weight should be updated.
+     * @param logUpdateFactor How to update the weight. This would be ln(f) in most Wang-Landau literature.
+     */
     private void updateWeight(E energy, double logUpdateFactor) {
         logWeights.put(energy, logWeights.getOrDefault(energy, 0.0) + logUpdateFactor);
         histogram.put(energy, histogram.getOrDefault(energy, 0) + 1);
     }
 
+    /**
+     * Overrides {@link super#getMoveSelector()}.
+     * Since this class wraps {@link MarkovState} with {@link WangLandauState}, {@link #getMarkovStateMoveSelector()} must be overridden by subclasses instead.
+     */
     @Override
-    public MarkovMoveSelector<WangLandauState<MarkovState, E>, WangLandauMove<MarkovState, MM, E>> getMoveSelector() {
+    public final MarkovMoveSelector<WangLandauState<MarkovState, E>, WangLandauMove<MarkovState, MM, E>> getMoveSelector() {
         return wangLandauMoveSelector;
     }
 
+    /**
+     * Overrides {@link super#deepCopy(MarkovState)}.
+     * Since this class wraps {@link MarkovState} with {@link WangLandauState}, {@link #deepCopyMarkovState(MarkovState)} must be overridden by subclasses instead.
+     */
     @Override
-    public WangLandauState<MarkovState, E> deepCopy(WangLandauState<MarkovState, E> wangLandauState) {
+    public final WangLandauState<MarkovState, E> deepCopy(WangLandauState<MarkovState, E> wangLandauState) {
         return new WangLandauState<>(deepCopyMarkovState(wangLandauState.getState()), wangLandauState.getEnergy().copy());
     }
 
+    /**
+     * Overrides {@link super#isMoveWithinConstraints(MM)}.
+     * Since this class wraps {@link MarkovState} with {@link WangLandauState}, {@link #isMarkovMoveMoveWithinConstraints(MM)} must be overridden by subclasses instead.
+     */
     @Override
     public boolean isMoveWithinConstraints(WangLandauMove<MarkovState, MM, E> move) {
         return isMarkovMoveMoveWithinConstraints(move.getMarkovMove());
     }
 
+    /**
+     * See {@link MarkovChain#isMoveWithinConstraints(MM)}.
+     */
     public abstract boolean isMarkovMoveMoveWithinConstraints(MM move);
 
-
+    /**
+     * In general, this should return (the probability of choosing this move)/(the probability of choosing the inverse of this move from the next state).
+     * This value comes from solving detailed balance of Wang-Landau for dynamic-sized systems.
+     * For constant-sized systems, this is likely just 1.
+     *
+     * @param move Move proposed.
+     * @return The coefficient to the ratio of weights in the acceptance probability obtained from detailed balance. For most constant-size systems this will just be 1.
+     */
     public double getAcceptanceAdjustment(MM move) {
         return 1.0;
     }
 
+    /**
+     *
+     * See {@link MarkovChain#deepCopy(MarkovState)}.
+     */
     public abstract MarkovState deepCopyMarkovState(MarkovState markovState);
 
+    /**
+     *
+     * See {@link MarkovChain#getMoveSelector()}.
+     */
     public abstract MarkovMoveSelector<MarkovState, MM> getMarkovStateMoveSelector();
 
+    /**
+     * @return The {@link WangLandauEnergy.Factory} used to obtain energy states.
+     */
     public abstract WangLandauEnergy.Factory<MarkovState, MM, E> getEnergyFactory();
 
+    /**
+     * Determines when to terminate Wang-Landau training.
+     * Traditionally this is a "check for flatness."
+     *
+     * @return If it is deemed that {@link #train(MarkovState, HashMap, int, double)} should terminate, then this returns true, otherwise false.
+     */
     public abstract boolean isTrainingOver();
 }
