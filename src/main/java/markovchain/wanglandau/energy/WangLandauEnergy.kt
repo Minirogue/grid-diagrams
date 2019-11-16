@@ -11,22 +11,31 @@ import markovchain.wanglandau.WangLandauState
 </E></MarkovState> */
 abstract class WangLandauEnergy<MarkovState, MM : MarkovMove<MarkovState>, E : WangLandauEnergy<MarkovState, MM, E>> {
 
+    /**
+     * @return A new WangLandauEnergy object holding the same value as this one.
+     */
     abstract fun copy(): E
 
+    /**
+     * @param move A proposed MarkovMove object.
+     * @return An energy object containing the energy of the state that will be obtained by performing the given move.
+     */
     abstract fun getNextEnergyFromMove(move: MM): E
 
-
-    //Must override hashCode() and equals() for HashMap of energies to work correctly
     abstract override fun hashCode(): Int
-
     abstract override fun equals(other: Any?): Boolean
-
-    //The user should be able to read the energy
     abstract override fun toString(): String
 
 
+    /**
+     * Factory class for a given energy type.
+     */
     abstract class Factory<MarkovState, MM : MarkovMove<MarkovState>, E : WangLandauEnergy<MarkovState, MM, E>> {
 
+        /**
+         * @param state A MarkovState for which the energy should be calculated.
+         * @return A WangLandauEnergy object calculated for state.
+         */
         abstract fun getEnergyFromState(state: MarkovState): E
     }
 }
