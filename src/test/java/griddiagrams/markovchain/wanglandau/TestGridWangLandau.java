@@ -1,3 +1,5 @@
+package griddiagrams.markovchain.wanglandau;
+
 import griddiagrams.GridDiagram;
 import griddiagrams.markovchain.GridMove;
 import griddiagrams.markovchain.wanglandau.GridDiagramWangLandau;
