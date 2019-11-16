@@ -26,6 +26,7 @@ hs_err_pid*
 .idea
 *.iml
 
-#Documentation
-docs
+# Build files
+build
 .gradle
+docs

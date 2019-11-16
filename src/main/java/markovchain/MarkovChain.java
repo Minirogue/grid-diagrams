@@ -64,7 +64,7 @@ public abstract class MarkovChain<MarkovState, MM extends MarkovMove<MarkovState
      * @param state The state to produce a copy of.
      * @return A copy of the given state with no references to the original object.
      */
-    public abstract MarkovState deepCopy(MarkovState state);
+    protected abstract MarkovState deepCopy(MarkovState state);
 
     /**
      * Override this method to impose constraints on the state space.
@@ -72,7 +72,7 @@ public abstract class MarkovChain<MarkovState, MM extends MarkovMove<MarkovState
      * @param move The move being proposed.
      * @return true if the proposed move is allowed, false if it is not.
      */
-    public boolean isMoveWithinConstraints(MM move) {
+    protected boolean isMoveWithinConstraints(MM move) {
         //System.out.println("MarkovChain.isMoveWithinConstraints called");
         return true;
     }
@@ -80,6 +80,6 @@ public abstract class MarkovChain<MarkovState, MM extends MarkovMove<MarkovState
     /**
      * @return The MarkovMoveSelector object that is to be used for choosing transitions.
      */
-    public abstract MarkovMoveSelector<MarkovState, MM> getMoveSelector();
+    protected abstract MarkovMoveSelector<MarkovState, MM> getMoveSelector();
 
 }

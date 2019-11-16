@@ -3,10 +3,11 @@ package griddiagrams.markovchain.wanglandau;
 import griddiagrams.GridDiagram;
 import griddiagrams.markovchain.GridMove;
 import markovchain.wanglandau.energy.WangLandauEnergy;
+import org.jetbrains.annotations.NotNull;
 
 public class SizeEnergy extends WangLandauEnergy<GridDiagram, GridMove, SizeEnergy> {
 
-    private int gridSize;
+    private final int gridSize;
 
     private SizeEnergy(int gridSize) {
         this.gridSize = gridSize;
@@ -17,11 +18,13 @@ public class SizeEnergy extends WangLandauEnergy<GridDiagram, GridMove, SizeEner
     }
 
 
+    @NotNull
     @Override
     public SizeEnergy copy() {
         return new SizeEnergy(gridSize);
     }
 
+    @NotNull
     @Override
     public SizeEnergy getNextEnergyFromMove(GridMove moveToNextState) {
         switch (moveToNextState.getMoveType()) {
@@ -52,12 +55,14 @@ public class SizeEnergy extends WangLandauEnergy<GridDiagram, GridMove, SizeEner
         }
     }
 
+    @NotNull
     @Override
     public String toString() {
         return Integer.toString(getSize());
     }
 
     public static class SizeEnergyFactory extends Factory<GridDiagram, GridMove, SizeEnergy> {
+        @NotNull
         @Override
         public SizeEnergy getEnergyFromState(GridDiagram gridDiagram) {
             return new SizeEnergy(gridDiagram.getSize());

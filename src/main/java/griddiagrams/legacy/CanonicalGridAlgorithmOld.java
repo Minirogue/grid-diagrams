@@ -11,7 +11,7 @@ public class CanonicalGridAlgorithmOld {
 	ArrayList<Double[]> probabilities;
 
 	public CanonicalGridAlgorithmOld(String knotName, double initZ){
-		gDiagram = new GridDiagram(knotName);
+		gDiagram = GridDiagram.getGridDiagramFromResource(knotName);
 		probabilities = new ArrayList<>();
 		probabilities.add(new Double[]{1.0,1.0,1.0});
 		z = initZ;
@@ -29,7 +29,8 @@ public class CanonicalGridAlgorithmOld {
 			for (int i = 0; i<steps; i++){
 				prevWrithe = gDiagram.calcWrithe();
 				//delta = 0;
-				gDiagram.printToTerminal();
+				//gDiagram.printToTerminal();
+				System.out.println(gDiagram.toString());
 				if (Math.random() < 0.01){
 					movetype = (int)(Math.random()*gDiagram.getSize()*gDiagram.getSize());
 					gDiagram.translate(movetype%gDiagram.getSize(), movetype/gDiagram.getSize());

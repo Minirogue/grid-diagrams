@@ -1,8 +1,6 @@
 package markovchain.wanglandau.energy
 
 import markovchain.MarkovMove
-import markovchain.wanglandau.WangLandauMove
-import markovchain.wanglandau.WangLandauState
 
 /**
  *

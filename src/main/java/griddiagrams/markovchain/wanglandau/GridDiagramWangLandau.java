@@ -11,9 +11,9 @@ import java.util.HashMap;
 
 public class GridDiagramWangLandau<E extends WangLandauEnergy<GridDiagram, GridMove, E>> extends WangLandauMarkovChain<GridDiagram, GridMove, E> {
 
-    private MarkovMoveSelector<GridDiagram, GridMove> markovMoveSelector = new GridMoveSelector();
-    private WangLandauEnergy.Factory<GridDiagram, GridMove, E> energyFactory;
-    private int maxSize;
+    private final MarkovMoveSelector<GridDiagram, GridMove> markovMoveSelector = new GridMoveSelector();
+    private final WangLandauEnergy.Factory<GridDiagram, GridMove, E> energyFactory;
+    private final int maxSize;
 
     public GridDiagramWangLandau(int maxSize, WangLandauEnergy.Factory<GridDiagram, GridMove, E> energyFactory){
         this.maxSize = maxSize;

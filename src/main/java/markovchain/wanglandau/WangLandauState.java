@@ -8,8 +8,8 @@ import markovchain.wanglandau.energy.WangLandauEnergy;
  * @param <MarkovState> The class representing states in the Markov Chain
  */
 public class WangLandauState<MarkovState, E extends WangLandauEnergy<MarkovState, ?, E>> {
-    private MarkovState state;
-    private E energy;
+    private final MarkovState state;
+    private final E energy;
 
     /**
      * @param state  The underlying MarkovState represented by this object.

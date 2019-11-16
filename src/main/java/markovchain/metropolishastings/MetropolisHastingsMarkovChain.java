@@ -36,5 +36,5 @@ public abstract class MetropolisHastingsMarkovChain<MarkovState, MM extends Mark
      * @param move The proposed MarkovMove
      * @return The probability that this move should be accepted and performed.
      */
-    public abstract double getAcceptanceProbability(MM move);
+    protected abstract double getAcceptanceProbability(MM move);
 }

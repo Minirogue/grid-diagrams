@@ -35,14 +35,14 @@ public class WangLandau {
 
 
 	public WangLandau(String knotName, int[] initEnergyType){
-		gDiagram = new GridDiagram(knotName);
+		gDiagram = GridDiagram.getGridDiagramFromResource(knotName);
 		Energy.setEnergyType(initEnergyType);
 		calcAndSetCurrentEnergy();
 		weights = new HashMap<>();
 		estimatedError = new HashMap<>();
 		upperSize = 100;//TODO don't hardcode
 		lowerSize = 0;//TODO don't hardcode
-		gDiagram.printToTerminal();
+		System.out.println(gDiagram.toString());
 	}
 
 	/**

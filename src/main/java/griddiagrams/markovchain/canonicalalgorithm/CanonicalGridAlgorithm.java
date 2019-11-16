@@ -11,9 +11,9 @@ import java.util.List;
 
 public class CanonicalGridAlgorithm extends MetropolisHastingsMarkovChain<GridDiagram, GridMove> {
 
-    private double z;
-    private List<Double[]> probabilities = new ArrayList<>();
-    private MarkovMoveSelector<GridDiagram, GridMove> moveSelector = new GridMoveSelector();
+    private final double z;
+    private final List<Double[]> probabilities = new ArrayList<>();
+    private final MarkovMoveSelector<GridDiagram, GridMove> moveSelector = new GridMoveSelector();
 
     public CanonicalGridAlgorithm(double z) {
         this.z = z;

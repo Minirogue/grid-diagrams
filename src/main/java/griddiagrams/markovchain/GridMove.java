@@ -5,14 +5,14 @@ import markovchain.MarkovMove;
 
 public class GridMove implements MarkovMove<GridDiagram> {
 
-    private static int[] stabSubTypes = new int[]{GridDiagram.INSERT_XO_COLUMN, GridDiagram.INSERT_OX_COLUMN, GridDiagram.INSERT_XO_ROW, GridDiagram.INSERT_OX_ROW};
+    private static final int[] stabSubTypes = new int[]{GridDiagram.INSERT_XO_COLUMN, GridDiagram.INSERT_OX_COLUMN, GridDiagram.INSERT_XO_ROW, GridDiagram.INSERT_OX_ROW};
 
-    private GridDiagram initialGrid;
+    private final GridDiagram initialGrid;
     private int moveType;
     private int moveSubType;
-    private int rowOrColumnIndex;
+    private final int rowOrColumnIndex;
     private int insertedLocation;
-    private int[] arguments;
+    private final int[] arguments;
 
     public GridMove(GridDiagram initialGrid, int moveType, int fourTimesRowColIndex, int insertedLocation) {
         this.initialGrid = initialGrid;
@@ -40,7 +40,7 @@ public class GridMove implements MarkovMove<GridDiagram> {
 
     }
 
-    public boolean isValid() {
+    private boolean isValid() {
         switch (moveType) {
             case GridDiagram.MOVETYPE_COMMUTATION:
                 if (moveSubType == GridDiagram.MOVE_SUBTYPE_ROW) {

@@ -1,3 +1,5 @@
+package griddiagrams.markovchain.canonicalalgorithm;
+
 import griddiagrams.GridDiagram;
 import griddiagrams.markovchain.canonicalalgorithm.CanonicalGridAlgorithm;
 

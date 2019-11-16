@@ -3,7 +3,6 @@ package griddiagrams;//package grid_tools;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -92,7 +91,7 @@ public class GridDiagram implements Serializable {
                     Object gridObj = gridMap.get(linkName);
                     if (gridObj instanceof int[][]) {
                         int[][] gridArr = (int[][]) gridObj;
-                        if (gridArr.length == 2 && gridArr[0].length == gridArr[1].length){
+                        if (gridArr.length == 2 && gridArr[0].length == gridArr[1].length) {
                             return new GridDiagram(gridArr[0], gridArr[1]);
                         }
                     }
@@ -759,7 +758,7 @@ public class GridDiagram implements Serializable {
     }
 
 
-    public class Row implements Serializable {
+    public static class Row implements Serializable {
         public static final long serialVersionUID = 0;
 
         private int xCol;
@@ -769,7 +768,7 @@ public class GridDiagram implements Serializable {
         private int direction;
         private int length;
 
-        public Row(int initXCol, int initOCol) {
+        Row(int initXCol, int initOCol) {
             xCol = initXCol;
             oCol = initOCol;
             setMinAndMax();
@@ -796,11 +795,11 @@ public class GridDiagram implements Serializable {
             return maxCol;
         }
 
-        public int getDirection() {
+        int getDirection() {
             return direction;
         }
 
-        public int getLength() {
+        int getLength() {
             return length;
         }
 
@@ -827,7 +826,7 @@ public class GridDiagram implements Serializable {
             length = length * direction;
         }
 
-        public class Column implements Serializable {
+        public static class Column implements Serializable {
             public static final long serialVersionUID = 0;
 
             private int xRow;
@@ -897,7 +896,7 @@ public class GridDiagram implements Serializable {
         }
     }
 
-    public class Column implements Serializable {
+    public static class Column implements Serializable {
         public static final long serialVersionUID = 0;
 
         private int xRow;

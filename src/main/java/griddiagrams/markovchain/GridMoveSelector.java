@@ -1,7 +1,6 @@
 package griddiagrams.markovchain;
 
 import griddiagrams.GridDiagram;
-import markovchain.MarkovMove;
 import markovchain.MarkovMoveSelector;
 
 public class GridMoveSelector implements MarkovMoveSelector<GridDiagram, GridMove> {

@@ -13,9 +13,9 @@ import markovchain.wanglandau.energy.WangLandauEnergy;
 public class WangLandauMove<MarkovState, MM extends MarkovMove<MarkovState>, E extends WangLandauEnergy<MarkovState, MM, E>> implements MarkovMove<WangLandauState<MarkovState, E>> {
 
     //The state (with energy) before performing the move
-    private WangLandauState<MarkovState, E> startingState;
+    private final WangLandauState<MarkovState, E> startingState;
     //The wrapped move being proposed
-    private MM markovMove;
+    private final MM markovMove;
     //The energy for the next state
     private E nextEnergy;
 

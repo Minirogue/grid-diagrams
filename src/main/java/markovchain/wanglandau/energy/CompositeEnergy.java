@@ -9,7 +9,7 @@ import java.util.List;
 public class CompositeEnergy<MarkovState, MM extends MarkovMove<MarkovState>> extends WangLandauEnergy<MarkovState, MM, CompositeEnergy<MarkovState, MM>> {
 
     //Stores the list of individual energy states
-    private List<WangLandauEnergy<MarkovState, MM, ?>> energy;
+    private final List<WangLandauEnergy<MarkovState, MM, ?>> energy;
 
     /**
      * Constructs a CompositeEnergy out of the a List of WangLandauEnergy objects.
@@ -104,7 +104,7 @@ public class CompositeEnergy<MarkovState, MM extends MarkovMove<MarkovState>> ex
     public static class CompositeEnergyFactory<MarkovState, MM extends MarkovMove<MarkovState>> extends Factory<MarkovState, MM, CompositeEnergy<MarkovState, MM>> {
 
         //Factories for each energy being composed
-        private List<Factory<MarkovState, MM, ?>> factories;
+        private final List<Factory<MarkovState, MM, ?>> factories;
 
         /**
          * @param factories A List of WangLandauEnergy.Factory objects defining the energies to be composed

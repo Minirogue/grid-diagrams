@@ -1,6 +1,7 @@
 plugins{
     id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.3.50'
+    id 'org.jetbrains.dokka' version '0.10.0'
 }
 
 version 'unreleased'
@@ -9,9 +10,17 @@ java {
    sourceCompatibility = JavaVersion.VERSION_1_8
    targetCompatibility = JavaVersion.VERSION_1_8
 }
+dokka {
+    //If using a version of java larger than 8 (type java -version on the command line if on Ubuntu),
+    // then comment out the next line and uncomment the following line.
+    outputFormat = 'javadoc'//only works if using jdk 8
+    //outputFormat = 'html-as-java'
+    outputDirectory = 'docs'
+}
 
 repositories {
-    mavenCentral()
+    jcenter()
+    //mavenCentral()
 }
 dependencies {
     //Kotlin
@@ -29,4 +38,15 @@ compileTestKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+}
+
+
+task runWangLandauTest(type: JavaExec){
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'griddiagrams.markovchain.wanglandau.TestGridWangLandau'
+}
+
+task buildGridMap(type: JavaExec){
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'griddiagrams.savegrids'
 }
