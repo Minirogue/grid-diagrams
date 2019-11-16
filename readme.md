@@ -20,8 +20,6 @@ Open the top-level directory and run `gradlew.bat` (untested)
 
 * **Shawn Witte** -  [Minirogue](https://github.com/Minirogue)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
 ## License
 
 License pending (I need to read up on these)
