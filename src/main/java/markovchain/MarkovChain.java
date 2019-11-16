@@ -3,6 +3,12 @@ package markovchain;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents the core logic of a Markov chain as it is typically used for Monte Carlo sampling.
+ *
+ * @param <MarkovState> The class that represents individual states in the Markov chain. This could be a class representing the Ising model, knot diagrams, knot embeddings, etc.
+ * @param <MM>          The class that represents transitions in the Markov chain.
+ */
 public abstract class MarkovChain<MarkovState, MM extends MarkovMove<MarkovState>> {
 
     /**
@@ -27,9 +33,9 @@ public abstract class MarkovChain<MarkovState, MM extends MarkovMove<MarkovState
      */
     public MarkovState step(MarkovState state) {
         MM move = getMoveSelector().getRandomMove(state);
-        if (isMoveWithinConstraints(move)){
+        if (isMoveWithinConstraints(move)) {
             return move.perform();
-        }else {
+        } else {
             return state;
         }
     }
@@ -66,11 +72,14 @@ public abstract class MarkovChain<MarkovState, MM extends MarkovMove<MarkovState
      * @param move The move being proposed.
      * @return true if the proposed move is allowed, false if it is not.
      */
-    public boolean isMoveWithinConstraints(MM move){
+    public boolean isMoveWithinConstraints(MM move) {
         //System.out.println("MarkovChain.isMoveWithinConstraints called");
         return true;
     }
 
+    /**
+     * @return The MarkovMoveSelector object that is to be used for choosing transitions.
+     */
     public abstract MarkovMoveSelector<MarkovState, MM> getMoveSelector();
 
 }
