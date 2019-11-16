@@ -1,4 +1,4 @@
-# # Grid Diagrams
+# Grid Diagrams
 
 Java (and Kotlin) code for working with Grid Diagrams developed during my PhD work. It includes classes for Wang-Landau weight training and sampling as well as a canonical-like Markov chain.
 
