@@ -3,6 +3,8 @@ package griddiagrams;//package grid_tools;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class for grid diagram representations of links including
@@ -61,33 +63,57 @@ public class GridDiagram implements Serializable {
     }
 
     /**
+     * @deprecated Use {@link #getGridDiagramFromResource(String)} instead.
+     */
+    public GridDiagram(String linkname) {
+        GridDiagram fromRes = getGridDiagramFromResource(linkname);
+        this.rows = fromRes.rows;
+        this.cols = fromRes.cols;
+        this.size = fromRes.size;
+    }
+
+    /**
      * Construct griddiagrams.GridDiagram from the link name (assuming the .grd file is correctly in place)
      *
      * @param linkName The link type of the desired grid diagram
      */
-    public GridDiagram(String linkName) {
+    public static GridDiagram getGridDiagramFromResource(String linkName) {
         try {
-            InputStream inFile = getClass().getClassLoader().getResourceAsStream("knot_conformations/griddiagrams/" + linkName + ".grd");
+            InputStream inFile = GridDiagram.class.getClassLoader().getResourceAsStream("grids_hashmap.ser");
             ObjectInputStream inObj = new ObjectInputStream(inFile);
-            GridDiagram diagramFromFile = (GridDiagram) inObj.readObject();
+            Object fileObj = inObj.readObject();
             inObj.close();
             if (inFile != null) {
                 inFile.close();
             }
-            rows = diagramFromFile.getRows();
-            cols = diagramFromFile.getCols();
-            size = diagramFromFile.getSize();
+            if (fileObj instanceof Map) {
+                Map gridMap = (Map) fileObj;
+                if (gridMap.containsKey(linkName)) {
+                    Object gridObj = gridMap.get(linkName);
+                    if (gridObj instanceof int[][]) {
+                        int[][] gridArr = (int[][]) gridObj;
+                        if (gridArr.length == 2 && gridArr[0].length == gridArr[1].length){
+                            return new GridDiagram(gridArr[0], gridArr[1]);
+                        }
+                    }
+                }
+            }
         } catch (FileNotFoundException e) {
-            System.err.println("File not found");
+            System.err.println("Grid resource file not found");
+            System.exit(1);
         } catch (IOException e) {
-            System.err.println(e);
+            e.printStackTrace();
+            System.exit(1);
         } catch (ClassNotFoundException e) {
             System.err.println("File not correctly formatted");
+            System.exit(1);
         }
+        System.err.println("Uh oh, this line should be unreachable (GridDiagram.getGridDiagramFromResource");
+        System.exit(1);
+        return new GridDiagram(new int[]{0, 1}, new int[]{1, 0});
     }
 
     /**
-     *
      * @return A new GridDiagram object that is a (deep) copy of this one.
      */
     public GridDiagram copy() {
@@ -634,7 +660,6 @@ public class GridDiagram implements Serializable {
     }
 
     /**
-     *
      * @param arguments An integer array where arguments[1] is MOVE_SUBTYPE_COLUMN or MOVE_SUBTYPE_ROW and arguments[0] is the row/column where the move is being performed
      * @return The amount that the writhe will change if the proposed move is performed
      */
