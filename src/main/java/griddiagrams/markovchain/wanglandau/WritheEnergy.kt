@@ -35,7 +35,7 @@ class WritheEnergy(private val writhe: Int) : WangLandauEnergy<GridDiagram, Grid
     }
 
 
-    class Factory : WangLandauEnergy.Factory<GridDiagram, GridMove, WritheEnergy>() {
+    class WritheEnergyFactory : WangLandauEnergyFactory<GridDiagram, GridMove, WritheEnergy>() {
         override fun getEnergyFromState(state: GridDiagram): WritheEnergy {
             return WritheEnergy(state.calcWrithe())
         }

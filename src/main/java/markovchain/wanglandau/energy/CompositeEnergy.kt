@@ -82,13 +82,13 @@ class CompositeEnergy<MarkovState, MM : MarkovMove<MarkovState>>
 
     class CompositeEnergyFactory<MarkovState, MM : MarkovMove<MarkovState>>
     /**
-     * @param factories A List of WangLandauEnergy.Factory objects defining the energies to be composed
+     * @param wangLandauEnergyFactories A List of WangLandauEnergy.Factory objects defining the energies to be composed
      */(//Factories for each energy being composed
-            private val factories: List<Factory<MarkovState, MM, *>>) : Factory<MarkovState, MM, CompositeEnergy<MarkovState, MM>>() {
+            private val wangLandauEnergyFactories: List<WangLandauEnergyFactory<MarkovState, MM, *>>) : WangLandauEnergyFactory<MarkovState, MM, CompositeEnergy<MarkovState, MM>>() {
 
         override fun getEnergyFromState(markovState: MarkovState): CompositeEnergy<MarkovState, MM> {
             val newEnergy: MutableList<WangLandauEnergy<MarkovState, MM, *>> = ArrayList()
-            for (factory in factories) {
+            for (factory in wangLandauEnergyFactories) {
                 newEnergy.add(factory.getEnergyFromState(markovState) as WangLandauEnergy<MarkovState, MM, *>)
             }
             return CompositeEnergy(newEnergy)

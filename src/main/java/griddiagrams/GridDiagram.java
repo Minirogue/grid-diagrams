@@ -95,6 +95,8 @@ public class GridDiagram implements Serializable {
                             return new GridDiagram(gridArr[0], gridArr[1]);
                         }
                     }
+                } else{
+                    throw new IllegalArgumentException("Link name not found in resources");
                 }
             }
         } catch (FileNotFoundException e) {
@@ -108,7 +110,6 @@ public class GridDiagram implements Serializable {
             System.exit(1);
         }
         System.err.println("Uh oh, this line should be unreachable (GridDiagram.getGridDiagramFromResource");
-        System.exit(1);
         return new GridDiagram(new int[]{0, 1}, new int[]{1, 0});
     }
 

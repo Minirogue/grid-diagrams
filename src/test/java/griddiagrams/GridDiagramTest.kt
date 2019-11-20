@@ -3,6 +3,7 @@ package griddiagrams
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.lang.IllegalArgumentException
 
 class GridDiagramTest{
 
@@ -26,6 +27,11 @@ class GridDiagramTest{
         val oCols = cols[1]
         assertArrayEquals(intArrayOf(1, 0, 4, 3, 2),xCols)
         assertArrayEquals(intArrayOf(4, 3, 2, 1, 0),oCols)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testInvalidKnotName(){
+        GridDiagram.getGridDiagramFromResource("not actually a link name")
     }
 
 }

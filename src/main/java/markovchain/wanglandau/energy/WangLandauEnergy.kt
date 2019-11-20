@@ -28,7 +28,7 @@ abstract class WangLandauEnergy<MarkovState, MM : MarkovMove<MarkovState>, E : W
     /**
      * Factory class for a given energy type.
      */
-    abstract class Factory<MarkovState, MM : MarkovMove<MarkovState>, E : WangLandauEnergy<MarkovState, MM, E>> {
+    abstract class WangLandauEnergyFactory<MarkovState, MM : MarkovMove<MarkovState>, E : WangLandauEnergy<MarkovState, MM, E>> {
 
         /**
          * @param state A MarkovState for which the energy should be calculated.

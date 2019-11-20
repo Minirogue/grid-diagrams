@@ -12,10 +12,10 @@ import java.util.HashMap;
 public class GridDiagramWangLandau<E extends WangLandauEnergy<GridDiagram, GridMove, E>> extends WangLandauMarkovChain<GridDiagram, GridMove, E> {
 
     private final MarkovMoveSelector<GridDiagram, GridMove> markovMoveSelector = new GridMoveSelector();
-    private final WangLandauEnergy.Factory<GridDiagram, GridMove, E> energyFactory;
+    private final WangLandauEnergy.WangLandauEnergyFactory<GridDiagram, GridMove, E> energyFactory;
     private final int maxSize;
 
-    public GridDiagramWangLandau(int maxSize, WangLandauEnergy.Factory<GridDiagram, GridMove, E> energyFactory){
+    public GridDiagramWangLandau(WangLandauEnergy.WangLandauEnergyFactory<GridDiagram, GridMove, E> energyFactory, int maxSize){
         this.maxSize = maxSize;
         this.energyFactory = energyFactory;
     }
@@ -26,7 +26,7 @@ public class GridDiagramWangLandau<E extends WangLandauEnergy<GridDiagram, GridM
     }
 
     @Override
-    public WangLandauEnergy.Factory<GridDiagram,GridMove, E> getEnergyFactory() {
+    public WangLandauEnergy.WangLandauEnergyFactory<GridDiagram,GridMove, E> getEnergyFactory() {
         return energyFactory;
     }
 
@@ -62,7 +62,7 @@ public class GridDiagramWangLandau<E extends WangLandauEnergy<GridDiagram, GridM
 
     @Override
     public boolean isMarkovMoveMoveWithinConstraints(GridMove move) {
-        return (move.getGridFromBeforeMove().getSize() <= maxSize || move.getMoveType() != GridDiagram.MOVETYPE_STABILIZATION);
+        return (move.getGridFromBeforeMove().getSize() < maxSize || move.getMoveType() != GridDiagram.MOVETYPE_STABILIZATION);
     }
 
     @Override

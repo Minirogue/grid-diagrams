@@ -41,7 +41,7 @@ class SizeEnergy private constructor(private val size: Int) : WangLandauEnergy<G
         return size.toString()
     }
 
-    class SizeEnergyFactory : Factory<GridDiagram, GridMove, SizeEnergy>() {
+    class SizeEnergyFactory : WangLandauEnergyFactory<GridDiagram, GridMove, SizeEnergy>() {
         override fun getEnergyFromState(state: GridDiagram): SizeEnergy {
             return SizeEnergy(state.size)
         }

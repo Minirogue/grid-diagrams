@@ -14,10 +14,13 @@ public class GridMove implements MarkovMove<GridDiagram> {
     private int insertedLocation;
     private final int[] arguments;
 
-    public GridMove(GridDiagram initialGrid, int moveType, int fourTimesRowColIndex, int insertedLocation) {
+    GridMove(GridDiagram initialGrid, int moveType, int fourTimesRowColIndex, int insertedLocation) {
         this.initialGrid = initialGrid;
         this.moveType = moveType;
         this.rowOrColumnIndex = fourTimesRowColIndex / 4;
+        if (fourTimesRowColIndex < 0 || this.rowOrColumnIndex >= initialGrid.getSize()) {
+            throw new IllegalArgumentException("GridMove constructor received an out of bounds index. Ensure that 0 <= fourTimesRowColIndex < 4*grid size");
+        }
         switch (moveType) {
             case GridDiagram.MOVETYPE_DESTABILIZATION:
             case GridDiagram.MOVETYPE_COMMUTATION:
@@ -25,19 +28,22 @@ public class GridMove implements MarkovMove<GridDiagram> {
                 this.arguments = new int[]{rowOrColumnIndex, moveSubType};
                 break;
             case GridDiagram.MOVETYPE_STABILIZATION:
-                this.moveSubType = stabSubTypes[fourTimesRowColIndex % 4];
+                if (insertedLocation < 0 || insertedLocation > initialGrid.getSize()) {
+                    throw new IllegalArgumentException("GridMove constructor received an invalid insertedLocation. Ensure that 0 <= insertedLocation <= grid size.");
+                }
                 this.insertedLocation = insertedLocation;
+                this.moveSubType = stabSubTypes[fourTimesRowColIndex % 4];
                 this.arguments = new int[]{rowOrColumnIndex, insertedLocation, moveSubType};
                 break;
-            case GridDiagram.MOVETYPE_NONE:
             default:
+                throw new IllegalArgumentException("GridMove constructor received invalid moveType. Use the static final MOVETYPE fields from GridDiagram.");
+            case GridDiagram.MOVETYPE_NONE:
                 this.arguments = new int[]{};
                 break;
         }
         if (!isValid()) {
             this.moveType = GridDiagram.MOVETYPE_NONE;
         }
-
     }
 
     private boolean isValid() {

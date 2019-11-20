@@ -12,20 +12,6 @@ import java.util.List;
 public abstract class MarkovChain<MarkovState, MM extends MarkovMove<MarkovState>> {
 
     /**
-     * Perform several steps in the Markov chain.
-     *
-     * @param steps The number of steps to take in the Markov chain.
-     * @param state The starting point for these steps. This object may be modified by the chain.
-     * @return The state obtained after taking the desired steps.
-     */
-    public MarkovState run(int steps, MarkovState state) {
-        for (int t = 0; t < steps; t++) {
-            state = step(state);
-        }
-        return state;
-    }
-
-    /**
      * Perform a single step in the Markov chain.
      *
      * @param state The state before performing the step. It may be modified by the step.
@@ -41,17 +27,32 @@ public abstract class MarkovChain<MarkovState, MM extends MarkovMove<MarkovState
     }
 
     /**
+     * Perform several steps in the Markov chain.
+     *
+     * @param state The starting point for these steps. This object may be modified by the chain.
+     * @param steps The number of steps to take in the Markov chain.
+     * @return The state obtained after taking the desired steps.
+     */
+    public MarkovState run(MarkovState state, int steps) {
+        for (int t = 0; t < steps; t++) {
+            state = step(state);
+        }
+        return state;
+    }
+
+
+    /**
      * Perform Monte Carlo sampling of the Markov chain.
      *
-     * @param numSamples      The number of desired samples.
-     * @param sampleFrequency The number of steps to take within the Markov chain between each sample.
      * @param state           The initial state of the Markov chain. This object may be modified by the chain.
+     * @param sampleFrequency The number of steps to take within the Markov chain between each sample.
+     * @param numSamples      The number of desired samples.
      * @return A List containing the obtained samples
      */
-    public List<MarkovState> sample(int numSamples, int sampleFrequency, MarkovState state) {
+    public List<MarkovState> sample(MarkovState state, int sampleFrequency, int numSamples) {//TODO switch deepCopy with a sampleProperty() function that returns the property to be sampled
         List<MarkovState> sampleList = new ArrayList<>();
         for (int t = 0; t < numSamples; t++) {
-            state = run(sampleFrequency, state);
+            state = run(state, sampleFrequency);
             sampleList.add(deepCopy(state));
         }
         return sampleList;

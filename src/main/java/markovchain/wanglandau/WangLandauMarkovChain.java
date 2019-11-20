@@ -25,21 +25,15 @@ public abstract class WangLandauMarkovChain<MarkovState, MM extends MarkovMove<M
      * Trains a set of Wang-Landau weights.
      *
      * @param state           The initial state where the Wang-Landau weight training will begin.
-     * @param logWeights      A preseeded list of Wang-Landau weights to use as a starting point for the training. This can be null or output from a previous training.
      * @param updateFrequency The number of steps that will be taken between each weight update. Must be at least 1.
      * @param logUpdateFactor The weights will be updated by *= e^(logUpdateFactor) at each step. Must be greater than 0.
      * @return A HashMap where the keys are energy values of type {@link E} and the values are log weights, i.e. the ratio of Wang-Landau weights for energies i and j is represented by e^(logWeight[i] - logWeight[j])
      */
-    public HashMap<E, Double> train(MarkovState state, HashMap<E, Double> logWeights, int updateFrequency, double logUpdateFactor) {
-        if (logWeights != null) {
-            this.logWeights = logWeights;
-        } else {
-            this.logWeights = new HashMap<>();
-        }
+    public HashMap<E, Double> train(MarkovState state, int updateFrequency, double logUpdateFactor) {
         WangLandauState<MarkovState, E> wangLandauState = new WangLandauState<>(state, getEnergyFactory().getEnergyFromState(state));
         updateWeight(wangLandauState.getEnergy(), 0);
         while (!isTrainingOver()) {
-            wangLandauState = run(updateFrequency, wangLandauState);
+            wangLandauState = run(wangLandauState, updateFrequency);
             updateWeight(wangLandauState.getEnergy(), logUpdateFactor);
         }
         return getLogWeights();//TODO this.logweights might be left unclean here.
@@ -63,10 +57,14 @@ public abstract class WangLandauMarkovChain<MarkovState, MM extends MarkovMove<M
 
 
     /**
-     * @return The current Wang-Landau log weights used to determine transitions in the Markov chain. This will change while {@link #train(MarkovState, HashMap, int, double)} is running.
+     * @return The current Wang-Landau log weights used to determine transitions in the Markov chain. This will change while {@link #train(Object, int, double)} is running.
      */
     protected HashMap<E, Double> getLogWeights() {
         return logWeights;
+    }
+
+    public void setLogWeights(HashMap<E, Double> newWeights) {
+        this.logWeights = newWeights;
     }
 
     /**
@@ -130,27 +128,25 @@ public abstract class WangLandauMarkovChain<MarkovState, MM extends MarkovMove<M
     }
 
     /**
-     *
      * See {@link MarkovChain#deepCopy(MarkovState)}.
      */
     protected abstract MarkovState deepCopyMarkovState(MarkovState markovState);
 
     /**
-     *
      * See {@link MarkovChain#getMoveSelector()}.
      */
     protected abstract MarkovMoveSelector<MarkovState, MM> getMarkovStateMoveSelector();
 
     /**
-     * @return The {@link WangLandauEnergy.Factory} used to obtain energy states.
+     * @return The {@link WangLandauEnergy.WangLandauEnergyFactory} used to obtain energy states.
      */
-    protected abstract WangLandauEnergy.Factory<MarkovState, MM, E> getEnergyFactory();
+    protected abstract WangLandauEnergy.WangLandauEnergyFactory<MarkovState, MM, E> getEnergyFactory();
 
     /**
      * Determines when to terminate Wang-Landau training.
      * Traditionally this is a "check for flatness."
      *
-     * @return If it is deemed that {@link #train(MarkovState, HashMap, int, double)} should terminate, then this returns true, otherwise false.
+     * @return If it is deemed that {@link #train(Object, int, double)} should terminate, then this returns true, otherwise false.
      */
     protected abstract boolean isTrainingOver();
 }
