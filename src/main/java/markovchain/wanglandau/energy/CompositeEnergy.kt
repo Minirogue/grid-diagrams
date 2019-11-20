@@ -13,7 +13,7 @@ class CompositeEnergy<MarkovState, MM : MarkovMove<MarkovState>>
          * @return Get the set of energy values that comprise this CompositeEnergy as a List.
          */
         //Stores the list of individual energy states
-        private val energyList: List<WangLandauEnergy<MarkovState, MM, *>>) : WangLandauEnergy<MarkovState, MM, CompositeEnergy<MarkovState, MM>?>() {
+        private val energyList: List<WangLandauEnergy<MarkovState, MM, *>>) : WangLandauEnergy<MarkovState, MM, CompositeEnergy<MarkovState, MM>>() {
 
     /**
      * @param move A proposed MarkovMove
@@ -29,8 +29,8 @@ class CompositeEnergy<MarkovState, MM : MarkovMove<MarkovState>>
 
     override fun copy(): CompositeEnergy<MarkovState, MM> {
         val newEnergy: MutableList<WangLandauEnergy<MarkovState, MM, *>> = ArrayList(energyList.size)
-        for (oldEnergy in energyList) {
-            newEnergy.add(oldEnergy.copy())
+        for (oldEnergy: WangLandauEnergy<MarkovState, MM, *> in energyList) {
+            newEnergy.add(oldEnergy.copy() as WangLandauEnergy<MarkovState, MM, *>)
         }
         return CompositeEnergy(newEnergy)
     }
@@ -89,7 +89,7 @@ class CompositeEnergy<MarkovState, MM : MarkovMove<MarkovState>>
         override fun getEnergyFromState(markovState: MarkovState): CompositeEnergy<MarkovState, MM> {
             val newEnergy: MutableList<WangLandauEnergy<MarkovState, MM, *>> = ArrayList()
             for (factory in factories) {
-                newEnergy.add(factory.getEnergyFromState(markovState))
+                newEnergy.add(factory.getEnergyFromState(markovState) as WangLandauEnergy<MarkovState, MM, *>)
             }
             return CompositeEnergy(newEnergy)
         }
