@@ -10,7 +10,7 @@ This package builds with Gradle using a wrapper.
 
 To compile the code, open a terminal in the top-level directory and run `./gradlew build` (untested on Mac OS).
 
-To compile the documentation (Javadocs+Kdocs) run `./gradlew dokka`. The documentation will be found in the docs folder.
+To compile the documentation (Javadocs+Kdocs) run `./gradlew dokka` (must change gradle file first if using jdk>8). The documentation will be found in the docs folder.
 
 ### Windows
 
@@ -18,7 +18,7 @@ Open the top-level directory and run `gradlew.bat` (untested)
 
 ## Author
 
-* **Shawn Witte** -  [Minirogue](https://github.com/Minirogue)
+* **[Shawn Witte](https://Minirogue.github.io)**
 
 ## License
 
