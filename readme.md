@@ -6,6 +6,10 @@ Java (and Kotlin) code for working with Grid Diagrams developed during my PhD wo
 
 This package builds with Gradle using a wrapper.
 
+### Prerequisites
+
+You must have Java JDK version 8 or greater and any version of Gradle installed in order to compile. Instructions for installing or checking for an installation of these for your particular system should be easy to find. 
+
 ### Linux and Mac OS
 
 To compile the code, open a terminal in the top-level directory and run `./gradlew build` (untested on Mac OS).
