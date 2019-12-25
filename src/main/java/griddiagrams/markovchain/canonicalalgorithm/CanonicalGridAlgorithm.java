@@ -32,7 +32,7 @@ public class CanonicalGridAlgorithm extends MetropolisHastingsMarkovChain<GridDi
     public double getAcceptanceProbability(GridMove move) {
         int n = move.getGridFromBeforeMove().getSize();
         int delta;
-        switch (move.getMoveType()) {
+        switch (move.getMoveType()) {// Acceptance probability depends on what kind of move is being performed
             case GridDiagram.MOVETYPE_NONE:
             case GridDiagram.MOVETYPE_COMMUTATION:
                 delta = 0;
@@ -47,10 +47,10 @@ public class CanonicalGridAlgorithm extends MetropolisHastingsMarkovChain<GridDi
                 System.err.println("Error in CanonicalGridAlgorithm: getAcceptanceProbability");
                 return -1;
         }
-        while (probabilities.size() < n + 1) {
+        while (probabilities.size() < n + 1) {// Probability only needs to be calculated if it hasn't already been cached.
             probabilities.add(new Double[]{1.0, Math.min(4 * z / probabilities.size(), 1.0), Math.min((probabilities.size() - 1) / (4 * z), 1.0)});
         }
-        return probabilities.get(n)[(delta + 3) % 3];
+        return probabilities.get(n)[(delta + 3) % 3];// This could just as easily use delta%3, but I'm not changing this without writing the proper tests first
     }
 
     @Override

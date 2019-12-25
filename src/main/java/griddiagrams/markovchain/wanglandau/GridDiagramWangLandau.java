@@ -12,10 +12,15 @@ import java.util.HashMap;
 
 public class GridDiagramWangLandau<E extends WangLandauEnergy<GridDiagram, GridMove, E>> extends WangLandauMarkovChain<GridDiagram, GridMove, E> {
 
-    private final MarkovMoveSelector<GridDiagram, GridMove> markovMoveSelector = new GridMoveSelector();
-    private final WangLandauEnergy.WangLandauEnergyFactory<GridDiagram, GridMove, E> energyFactory;
-    private final int maxSize;
+    private final MarkovMoveSelector<GridDiagram, GridMove> markovMoveSelector = new GridMoveSelector();// Create a single GridMoveSelector to be returned by getMoveSelector()
+    private final WangLandauEnergy.WangLandauEnergyFactory<GridDiagram, GridMove, E> energyFactory;// This is how the energy for the algorithm is determined
+    private final int maxSize;// Used to constrain the algorithm to a finite algorithm
 
+    /** The main constructor for GridDiagramWangLandau.
+     *
+     * @param energyFactory This defines the energy used to define each Wang-Landau weight.
+     * @param maxSize The largest permissible size for the grid diagrams in this algorithm.
+     */
     public GridDiagramWangLandau(WangLandauEnergy.WangLandauEnergyFactory<GridDiagram, GridMove, E> energyFactory, int maxSize) {
         this.maxSize = maxSize;
         this.energyFactory = energyFactory;
