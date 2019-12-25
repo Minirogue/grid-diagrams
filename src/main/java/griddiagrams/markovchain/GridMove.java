@@ -8,12 +8,20 @@ public class GridMove implements MarkovMove<GridDiagram> {
     private static final int[] stabSubTypes = new int[]{GridDiagram.INSERT_XO_COLUMN, GridDiagram.INSERT_OX_COLUMN, GridDiagram.INSERT_XO_ROW, GridDiagram.INSERT_OX_ROW};
 
     private final GridDiagram initialGrid;
-    private int moveType;
-    private int moveSubType;
-    private final int rowOrColumnIndex;
-    private int insertedLocation;
-    private final int[] arguments;
+    private int moveType; // Stabilization, destabilization or commutation defined by the MOVETYPE constants in GridDiagram
+    private int moveSubType; // For destabilizations and commutations, this says whether rowOrColumnIndex points to a row or a column. For stabilizations it also determines the order of the new entries.
+    private final int rowOrColumnIndex; // The row/column index of the move
+    private int insertedLocation; // The grid line of insertion for stabilizations (not used for destabilizations and commutations).
+    private final int[] arguments;// The arguments that are used to calculate energy changes.
 
+    /**
+     * Main constructor for GridMove.
+     *
+     * @param initialGrid          The grid on which the move is being performed.
+     * @param moveType             The GridDiagram.MOVETYPE constant associated to this move
+     * @param fourTimesRowColIndex Must be 0 <= fourTimesRowColIndex < 4*initialGrid.getSize(). This defines where the move happens, and the order of the inserted entries in stabilizations.
+     * @param insertedLocation     Only used for stabilizations. This is where the insertion takes place.
+     */
     GridMove(GridDiagram initialGrid, int moveType, int fourTimesRowColIndex, int insertedLocation) {
         this.initialGrid = initialGrid;
         this.moveType = moveType;
@@ -46,6 +54,11 @@ public class GridMove implements MarkovMove<GridDiagram> {
         }
     }
 
+    /**
+     * Checks to see if this move is actually a valid move.
+     *
+     * @return True if performing the move is a valid move. False if it is a commutation between interleaved rows/columns, or if it is a destabilization in a row/column where the entries are not adjacent.
+     */
     private boolean isValid() {
         switch (moveType) {
             case GridDiagram.MOVETYPE_COMMUTATION:
@@ -108,14 +121,27 @@ public class GridMove implements MarkovMove<GridDiagram> {
         return initialGrid;
     }
 
+    /**
+     * @return The move type which is equivalent to one of the GridDiagram.MOVETYPE constants.
+     */
     public int getMoveType() {
         return moveType;
     }
 
+    /**
+     * Destabilizations and commutations are defined by their row/column index.
+     * Whether a row or column is being referenced is determined by moveSubType which is a GridDiagram constant.
+     * If the move is a stabilization, then it is defined by a different subtype declaring the order of the inserted entries as well as row/column, and also by the index of the grid line where the insertion is to take place.
+     *
+     * @return If the move is a destabilization or a commutation, then [rowOrColumnIndex, moveSubType]. If the move is a stabilization, then [rowOrColumnIndex, insertedLocation, moveSubType].
+     */
     public int[] getMoveArguments() {
         return arguments;
     }
 
+    /**
+     * @return The GridDiagram before the move is performed on it.
+     */
     public GridDiagram getGridFromBeforeMove() {
         return initialGrid;
     }

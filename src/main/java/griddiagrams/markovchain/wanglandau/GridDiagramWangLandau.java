@@ -61,6 +61,13 @@ public class GridDiagramWangLandau<E extends WangLandauEnergy<GridDiagram, GridM
         return true;
     }
 
+    /**
+     * By default this is set to bound the grid size above by the maxSize given to the constructor.
+     * Override this if a different constraint is desired.
+     *
+     * @param move The proposed move that might push the state outside of the desired constraints
+     * @return True if the move is okay. False if it violates the constraints.
+     */
     @Override
     public boolean isMarkovMoveMoveWithinConstraints(GridMove move) {
         return (move.getGridFromBeforeMove().getSize() < maxSize || move.getMoveType() != GridDiagram.MOVETYPE_STABILIZATION);

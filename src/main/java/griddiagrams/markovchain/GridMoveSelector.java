@@ -3,6 +3,12 @@ package griddiagrams.markovchain;
 import griddiagrams.GridDiagram;
 import markovchain.MarkovMoveSelector;
 
+/**
+ * GridMoveSelector selects a move by first randomly selecting from stabilization, destabilization, and commutation.
+ * If stabilization is selected, then a row/column is selected randomly from the 2*gridSize choices, a grid line is selected from the gridSize+1 choices, and the order of the inserted X and O is selected randomly from the 2 choices.
+ * If destabilization is selected, then a row/column is selected randomly from the 2*gridSize choices.
+ * If commutation is selected, then a row/column is selected randomly from the 2*gridSize choices.
+ */
 public class GridMoveSelector implements MarkovMoveSelector<GridDiagram, GridMove> {
     @Override
     public GridMove getRandomMove(GridDiagram gridDiagram) {
