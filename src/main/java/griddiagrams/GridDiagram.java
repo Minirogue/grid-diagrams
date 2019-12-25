@@ -11,6 +11,7 @@ import java.util.Map;
  */
 public class GridDiagram implements Serializable {
     public static final long serialVersionUID = 0;
+    public static final String GRIDS_HASHMAP_SER = "grids_hashmap.ser";
 
 
     public static final int INSERT_XO_COLUMN = 0;
@@ -78,7 +79,7 @@ public class GridDiagram implements Serializable {
      */
     public static GridDiagram getGridDiagramFromResource(String linkName) {
         try {
-            InputStream inFile = GridDiagram.class.getClassLoader().getResourceAsStream("grids_hashmap.ser");
+            InputStream inFile = GridDiagram.class.getClassLoader().getResourceAsStream(GRIDS_HASHMAP_SER);
             ObjectInputStream inObj = new ObjectInputStream(inFile);
             Object fileObj = inObj.readObject();
             inObj.close();
