@@ -10,8 +10,8 @@ public class TestCanonicalGridAlgorithm {
     public static void main(String[] args) {
         CanonicalGridAlgorithm canonicalGridAlgorithm = new CanonicalGridAlgorithm(.9);
         GridDiagram gd = new GridDiagram(new int[]{0,1}, new int[]{1,0});
-        List<GridDiagram> samples = canonicalGridAlgorithm.sample(gd, 10000, 30);
-        for (GridDiagram sample : samples){
+        List<Object> samples = canonicalGridAlgorithm.sample(gd, 10000, 30);
+        for (Object sample : samples){
             System.out.println(sample.toString());
         }
     }

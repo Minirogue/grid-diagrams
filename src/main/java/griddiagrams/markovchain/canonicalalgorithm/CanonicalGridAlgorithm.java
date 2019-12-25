@@ -11,16 +11,20 @@ import java.util.List;
 
 public class CanonicalGridAlgorithm extends MetropolisHastingsMarkovChain<GridDiagram, GridMove> {
 
-    private final double z;
-    private final List<Double[]> probabilities = new ArrayList<>();
-    private final MarkovMoveSelector<GridDiagram, GridMove> moveSelector = new GridMoveSelector();
+    private final double z;// Fugacity parameter that chooses the posterior distribution.
+    private final List<Double[]> probabilities = new ArrayList<>();// Since transition probabilities depend on the grid size, they are cached here.
+    private final MarkovMoveSelector<GridDiagram, GridMove> moveSelector = new GridMoveSelector(); // Create a single GridMoveSelector to be returned by getMoveSelector().
 
+    /**
+     * Main constructor for CanonicalGridAlgorithm
+     * @param z The fugacity parameter that decides the posterior distribution of the algorithm.
+     */
     public CanonicalGridAlgorithm(double z) {
         this.z = z;
     }
 
     @Override
-    public GridDiagram deepCopy(GridDiagram originalGridDiagram) {
+    public Object sampleProperty(GridDiagram originalGridDiagram) {
         return originalGridDiagram.copy();
     }
 
