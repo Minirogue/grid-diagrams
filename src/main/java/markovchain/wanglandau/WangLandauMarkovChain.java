@@ -93,11 +93,11 @@ public abstract class WangLandauMarkovChain<MarkovState, MM extends MarkovMove<M
     }
 
     /**
-     * Overrides {@link super#deepCopy(MarkovState)}.
+     * Overrides {@link super#sampleProperty(MarkovState)}.
      * Since this class wraps {@link MarkovState} with {@link WangLandauState}, {@link #deepCopyMarkovState(MarkovState)} must be overridden by subclasses instead.
      */
     @Override
-    public final WangLandauState<MarkovState, E> deepCopy(WangLandauState<MarkovState, E> wangLandauState) {
+    public final Object sampleProperty(WangLandauState<MarkovState, E> wangLandauState) {
         return new WangLandauState<>(deepCopyMarkovState(wangLandauState.getState()), wangLandauState.getEnergy().copy());
     }
 
@@ -128,7 +128,7 @@ public abstract class WangLandauMarkovChain<MarkovState, MM extends MarkovMove<M
     }
 
     /**
-     * See {@link MarkovChain#deepCopy(MarkovState)}.
+     * See {@link MarkovChain#sampleProperty(MarkovState)}.
      */
     protected abstract MarkovState deepCopyMarkovState(MarkovState markovState);
 

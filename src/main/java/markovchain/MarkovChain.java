@@ -49,23 +49,26 @@ public abstract class MarkovChain<MarkovState, MM extends MarkovMove<MarkovState
      * @param numSamples      The number of desired samples.
      * @return A List containing the obtained samples
      */
-    public List<MarkovState> sample(MarkovState state, int sampleFrequency, int numSamples) {//TODO switch deepCopy with a sampleProperty() function that returns the property to be sampled
-        List<MarkovState> sampleList = new ArrayList<>();
+    public List<Object> sample(MarkovState state, int sampleFrequency, int numSamples) {
+        List<Object> sampleList = new ArrayList<>();
         for (int t = 0; t < numSamples; t++) {
             state = run(state, sampleFrequency);
-            sampleList.add(deepCopy(state));
+            sampleList.add(sampleProperty(state));
         }
         return sampleList;
     }
 
     /**
-     * Create and return a copy of the given state so it may be stored safely while the original is modified.
-     * Here's a stackoverflow question for making such a copy: https://stackoverflow.com/questions/64036/how-do-you-make-a-deep-copy-of-an-object-in-java.
+     * Returns the property being sampled.  By default, it returns the state.
+     * This may cause issues if the state is reused and modified in the implementation of MarkovMove.
+     * It is recommended to override this method to create a copy of the given state if that is what is being sampled.
      *
-     * @param state The state to produce a copy of.
-     * @return A copy of the given state with no references to the original object.
+     * @param state The state being sampled.
+     * @return The property of the given state being sampled.
      */
-    protected abstract MarkovState deepCopy(MarkovState state);
+    protected Object sampleProperty(MarkovState state){
+        return state;
+    }
 
     /**
      * Override this method to impose constraints on the state space.
