@@ -5,6 +5,7 @@ import griddiagrams.markovchain.GridMove;
 import griddiagrams.markovchain.GridMoveSelector;
 import markovchain.MarkovMoveSelector;
 import markovchain.wanglandau.WangLandauMarkovChain;
+import markovchain.wanglandau.WangLandauState;
 import markovchain.wanglandau.energy.WangLandauEnergy;
 
 import java.util.HashMap;
@@ -15,7 +16,7 @@ public class GridDiagramWangLandau<E extends WangLandauEnergy<GridDiagram, GridM
     private final WangLandauEnergy.WangLandauEnergyFactory<GridDiagram, GridMove, E> energyFactory;
     private final int maxSize;
 
-    public GridDiagramWangLandau(WangLandauEnergy.WangLandauEnergyFactory<GridDiagram, GridMove, E> energyFactory, int maxSize){
+    public GridDiagramWangLandau(WangLandauEnergy.WangLandauEnergyFactory<GridDiagram, GridMove, E> energyFactory, int maxSize) {
         this.maxSize = maxSize;
         this.energyFactory = energyFactory;
     }
@@ -26,7 +27,7 @@ public class GridDiagramWangLandau<E extends WangLandauEnergy<GridDiagram, GridM
     }
 
     @Override
-    public WangLandauEnergy.WangLandauEnergyFactory<GridDiagram,GridMove, E> getEnergyFactory() {
+    public WangLandauEnergy.WangLandauEnergyFactory<GridDiagram, GridMove, E> getEnergyFactory() {
         return energyFactory;
     }
 
@@ -66,7 +67,8 @@ public class GridDiagramWangLandau<E extends WangLandauEnergy<GridDiagram, GridM
     }
 
     @Override
-    public GridDiagram deepCopyMarkovState(GridDiagram gridDiagram) {
-        return gridDiagram.copy();
+    public Object sampleProperty(WangLandauState<GridDiagram, E> wangLandauState) {
+        return wangLandauState.getState().copy();
     }
+
 }
