@@ -1,5 +1,7 @@
 package griddiagrams;//package grid_tools;
 
+import griddiagrams.markovchain.GridMove;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,16 +16,19 @@ public class GridDiagram implements Serializable {
     public static final String GRIDS_HASHMAP_SER = "grids_hashmap.ser";
 
 
+    //Move subtypes for stabilization
     public static final int INSERT_XO_COLUMN = 0;
     public static final int INSERT_OX_COLUMN = 1;
     public static final int INSERT_XO_ROW = 2;
     public static final int INSERT_OX_ROW = 3;
 
+    //Move types
     public static final int MOVETYPE_NONE = -1;
     public static final int MOVETYPE_STABILIZATION = 1;
     public static final int MOVETYPE_DESTABILIZATION = 2;
     public static final int MOVETYPE_COMMUTATION = 0;
 
+    //Move subtypes for commutation and destabilization
     public static final int MOVE_SUBTYPE_COLUMN = 1;
     public static final int MOVE_SUBTYPE_ROW = 2;
 
@@ -36,6 +41,14 @@ public class GridDiagram implements Serializable {
     private int size;
 
 
+    /**
+     * Takes indices of X's and O's in both rows and columns to create a GridDiagram.
+     *
+     * @param initXCol The ith entry corresponds to which row holds the X in the ith column.
+     * @param initOCol The ith entry corresponds to which row holds the O in the ith column.
+     * @param initXRow The ith entry corresponds to which column holds the X in the ith row.
+     * @param initORow The ith entry corresponds to which column holds the O in the ith row.
+     */
     public GridDiagram(ArrayList<Integer> initXCol, ArrayList<Integer> initOCol, ArrayList<Integer> initXRow, ArrayList<Integer> initORow) {
         rows = new ArrayList<>();
         cols = new ArrayList<>();
@@ -46,6 +59,12 @@ public class GridDiagram implements Serializable {
         this.size = initXCol.size();
     }
 
+    /**
+     * Takes indices of X's and O's in columns to create a GridDiagram.
+     *
+     * @param initXCol The ith entry corresponds to which row holds the X in the ith column.
+     * @param initOCol The ith entry corresponds to which row holds the O in the ith column.
+     */
     public GridDiagram(int[] initXCol, int[] initOCol) {
         int[] initXRow = new int[initXCol.length];
         int[] initORow = new int[initOCol.length];
@@ -96,7 +115,7 @@ public class GridDiagram implements Serializable {
                             return new GridDiagram(gridArr[0], gridArr[1]);
                         }
                     }
-                } else{
+                } else {
                     throw new IllegalArgumentException("Link name not found in resources");
                 }
             }
@@ -223,6 +242,9 @@ public class GridDiagram implements Serializable {
         System.out.println(toString());
     }
 
+    /**
+     * @return A text-based graphical representation of the grid diagram (assuming equal character width)
+     */
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder(size * (size + 1));
@@ -244,6 +266,11 @@ public class GridDiagram implements Serializable {
         return str.toString();
     }
 
+    /**
+     * Commutes given row with the next row (cyclically). This does not check whether or not they are interleaved.
+     *
+     * @param rownumber The row to be commuted.
+     */
     public void commuteRow(int rownumber) {
         int nextrow = (rownumber + 1) % size;
         Collections.swap(rows, rownumber, nextrow);
@@ -253,6 +280,11 @@ public class GridDiagram implements Serializable {
         cols.get(rows.get(nextrow).getOCol()).setORow(nextrow);
     }
 
+    /**
+     * Commutes given column with the next column (cyclically). This does not check whether or not they are interleaved.
+     *
+     * @param colnumber The column to be commuted.
+     */
     public void commuteCol(int colnumber) {
         int nextcol = (colnumber + 1) % size;
         Collections.swap(cols, colnumber, nextcol);
@@ -262,6 +294,12 @@ public class GridDiagram implements Serializable {
         rows.get(cols.get(nextcol).getORow()).setOCol(nextcol);
     }
 
+    /**
+     * Checks if the given row and the next one (cyclically) are interleaved or not.
+     *
+     * @param rownumber The row to check.
+     * @return True if the rows are not interleaved (commutation is a valid move). False if they are interleaved (commutation is not a valid move).
+     */
     public boolean isCommuteRowValid(int rownumber) {
         Row thisRow = rows.get(rownumber);
         Row nextRow = rows.get((rownumber + 1) % size);
@@ -284,6 +322,12 @@ public class GridDiagram implements Serializable {
                 || (maxNextRow > maxThisRow && maxThisRow > minNextRow && minNextRow > minThisRow));
     }
 
+    /**
+     * Checks if the given column and the next one (cyclically) are interleaved or not.
+     *
+     * @param colnumber The column to check.
+     * @return True if the columns are not interleaved (commutation is a valid move). False if they are interleaved (commutation is not a valid move).
+     */
     public boolean isCommuteColValid(int colnumber) {
         Column thisCol = cols.get(colnumber);
         Column nextCol = cols.get((colnumber + 1) % size);
@@ -306,6 +350,13 @@ public class GridDiagram implements Serializable {
                 || (maxNextCol > maxThisCol && maxThisCol > minNextCol && minNextCol > minThisCol));
     }
 
+    /**
+     * Checks whether the given row and the next one (cyclically) are interleaved or not.
+     * If they are not, then they are commuted.
+     *
+     * @param row The row to check/commute.
+     * @return True if commutation occurred, otherwise false.
+     */
     public boolean commuteRowIfValid(int row) {
         if (isCommuteRowValid(row)) {
             commuteRow(row);
@@ -314,6 +365,13 @@ public class GridDiagram implements Serializable {
         return false;
     }
 
+    /**
+     * Checks whether the given column and the next one (cyclically) are interleaved or not.
+     * If they are not, then they are commuted.
+     *
+     * @param col The column to check/commute.
+     * @return True if commutation occurred, otherwise false.
+     */
     public boolean commuteColIfValid(int col) {
         if (isCommuteColValid(col)) {
             commuteCol(col);
@@ -322,6 +380,12 @@ public class GridDiagram implements Serializable {
         return false;
     }
 
+    /**
+     * Performs a translation (aka cyclic permutation).
+     *
+     * @param horizontal Number of units to translate to the right.
+     * @param vertical   Number of units to translate down.
+     */
     public void translate(int horizontal, int vertical) {
         ArrayList<Row> newRows = new ArrayList<>();
         ArrayList<Column> newCols = new ArrayList<>();
@@ -337,6 +401,13 @@ public class GridDiagram implements Serializable {
         cols = newCols;
     }
 
+    /**
+     * Perform a stabilization move.
+     *
+     * @param rowNumber The row/horizontal grid line where the move will be performed.
+     * @param colNumber The column/vertical grid line where the move will be performed.
+     * @param type      One of the constants INSERT_XO_ROW, INSERT_OX_ROW, INSERT_XO_COLUMN, or INSERT_OX_COLUMN, which determines the order and direction of the inserted entries.
+     */
     public void stabilize(int rowNumber, int colNumber, int type) {
         Row thisRow;
         for (int i = rowNumber; i < size; i++) {
@@ -403,6 +474,12 @@ public class GridDiagram implements Serializable {
         size++;
     }
 
+    /**
+     * Perform a destabilization in the given column.
+     * This does not check to make sure that the destabilization is valid.
+     *
+     * @param colnumber The column in which the destabilization will take place.
+     */
     public void destabilizeCol(int colnumber) {
         Column thisCol;
         Row thisRow;
@@ -438,6 +515,12 @@ public class GridDiagram implements Serializable {
         size--;
     }
 
+    /**
+     * Perform a destabilization in the given row.
+     * This does not check to make sure that the destabilization is valid.
+     *
+     * @param rownumber The row in which the destabilization will take place.
+     */
     public void destabilizeRow(int rownumber) {
         Row thisRow;
         Column thisCol;
@@ -473,16 +556,35 @@ public class GridDiagram implements Serializable {
         size--;
     }
 
+    /**
+     * Checks to see if destabilizing in the given row is valid.
+     *
+     * @param row The row of the proposed destabilization.
+     * @return True if the entries in the row are adjacent (valid destabilization). False otherwise.
+     */
     public boolean isDestabilizeRowValid(int row) {
         Row thisRow = rows.get(row);
         return thisRow.getMaxCol() - thisRow.getMinCol() == 1 && size > 2;
     }
 
+    /**
+     * Checks to see if destabilizing in the given column is valid.
+     *
+     * @param col The column of the proposed destabilization.
+     * @return True if the entries in the column are adjacent (valid destabilization). False otherwise.
+     */
     public boolean isDestabilizeColValid(int col) {
         Column thisCol = cols.get(col);
         return thisCol.getMaxRow() - thisCol.getMinRow() == 1 && size > 2;
     }
 
+    /**
+     * Performs elementary destabilization at the given index if it is adjacent both vertically and horizontally to other entries.
+     *
+     * @param row Row index of entry to be destabilized.
+     * @param col Column index of entry to be destabilized.
+     * @return True if destabilization occurred.
+     */
     public boolean destabilizeIfValid(int row, int col) {
         if (isDestabilizeColValid(col)) {
             //System.out.println("column destabilizable");
@@ -497,6 +599,12 @@ public class GridDiagram implements Serializable {
         return false;
     }
 
+    /**
+     * Checks to make sure the rows and column entries match each other.
+     * Useful for debugging.
+     *
+     * @return True if there are no issues with the entries. False if they don't match.
+     */
     public boolean isRowMatchColumns() {
         for (int i = 0; i < size; i++) {
             if (rows.get(i).getXCol() == size) {
@@ -515,6 +623,11 @@ public class GridDiagram implements Serializable {
         return true;
     }
 
+    /**
+     * Calculate projected writhe.
+     *
+     * @return The projected writhe of this grid diagram.
+     */
     public int calcWrithe() {
         int totalwrithe = 0;
         Row thisRow;
@@ -531,6 +644,13 @@ public class GridDiagram implements Serializable {
         return totalwrithe;
     }
 
+    /**
+     * Calculates a number that can be added to the current projected writhe to get the projected writhe of the grid diagram resulting from the given move.
+     *
+     * @param movetype  One of MOVETYPE_COMMUTATION, MOVETYPE_STABILIZATION, or MOVETYPE_DESTABILIZATION.
+     * @param arguments The parameters of the given move. This should match the return of {@link GridMove#getMoveArguments()}
+     * @return The change in writhe that will occur from the given move.
+     */
     public int deltaWrithe(int movetype, int[] arguments) {
         //System.out.println("deltawrithe called");
         int delta = 0;
@@ -549,6 +669,12 @@ public class GridDiagram implements Serializable {
         return delta;
     }
 
+    /**
+     * Calculates the change in writhe from performing the given stabilization.
+     *
+     * @param arguments The arguments of the stabilization. Should match the return of {@link GridMove#getMoveArguments()}
+     * @return The change in writhe from performing the given stabilization.
+     */
     private int stabilizeDeltaWrithe(int[] arguments) {
         Row thisRow;
         Column thisCol;
@@ -593,6 +719,12 @@ public class GridDiagram implements Serializable {
         return 0;
     }
 
+    /**
+     * Calculates the change in writhe from performing the given destabilization.
+     *
+     * @param arguments The arguments of the destabilization. Should match the return of {@link GridMove#getMoveArguments()}
+     * @return The change in writhe from performing the given destabilization.
+     */
     private int destabilizeDeltaWrithe(int[] arguments) {
         if (arguments[1] == MOVE_SUBTYPE_ROW) {
             Row thisRow;
@@ -648,6 +780,9 @@ public class GridDiagram implements Serializable {
         return 0;
     }
 
+    /**
+     * @return A pair of integer arrays which can be used with {@link #GridDiagram(int[], int[])} to recreate this grid diagram.
+     */
     public int[][] getSavableGrid() {
         int[] xCol = new int[getSize()];
         int[] oCol = new int[getSize()];
@@ -744,6 +879,12 @@ public class GridDiagram implements Serializable {
         return delta;
     }
 
+    /**
+     * Calculates the change in size from a given move.
+     *
+     * @param moveType The MOVETYPE_COMMUTATION, MOVETYPE_DESTABILIZATION, or MOVETYPE_STABILIZATION
+     * @return The change in size that will result from the move.
+     */
     public static int deltaSize(int moveType) {
         switch (moveType) {
             case GridDiagram.MOVETYPE_STABILIZATION:
@@ -760,13 +901,20 @@ public class GridDiagram implements Serializable {
     }
 
 
+    /**
+     * Represents the entries in a row of the grid diagram.
+     */
     public static class Row implements Serializable {
         public static final long serialVersionUID = 0;
 
+        //The column indices of the entries in this row
         private int xCol;
         private int oCol;
+
+        //The indices again, but as minimum/maximum indices
         private int minCol;
         private int maxCol;
+
         private int direction;
         private int length;
 
@@ -776,34 +924,56 @@ public class GridDiagram implements Serializable {
             setMinAndMax();
         }
 
+        /**
+         * @return The column indices of the X and O in this row as a readable string. Useful for debugging.
+         */
         @Override
         public String toString() {
             return "X: " + xCol + " O: " + oCol;
         }
 
+        /**
+         * @return The column index of the X in this row
+         */
         public int getXCol() {
             return xCol;
         }
 
+        /**
+         * @return The column index of the O in this row
+         */
         public int getOCol() {
             return oCol;
         }
 
+        /**
+         * @return The smaller column index in this row.
+         */
         int getMinCol() {
             return minCol;
         }
 
+        /**
+         * @return The larger column index in this row.
+         */
         int getMaxCol() {
             return maxCol;
         }
 
+        /**
+         * @return Positive if edge is oriented to the right, and negative if oriented to the left.
+         */
         int getDirection() {
             return direction;
         }
 
+        /**
+         * @return The length of the edge in this row.
+         */
         int getLength() {
             return length;
         }
+
 
         void setXCol(int newXCol) {
             this.xCol = newXCol;
@@ -827,84 +997,22 @@ public class GridDiagram implements Serializable {
             direction = (int) Math.signum(length);
             length = length * direction;
         }
-
-        public static class Column implements Serializable {
-            public static final long serialVersionUID = 0;
-
-            private int xRow;
-            private int oRow;
-            private int minRow;
-            private int maxRow;
-            private int direction;
-            private int length;
-
-            public Column(int initXRow, int initORow) {
-                xRow = initXRow;
-                oRow = initORow;
-                setMaxAndMin();
-            }
-
-            @Override
-            public String toString() {
-                return "X: " + xRow + " O: " + oRow;
-            }
-
-            public int getXRow() {
-                return xRow;
-            }
-
-            public int getORow() {
-                return oRow;
-            }
-
-            public int getMinRow() {
-                return minRow;
-            }
-
-            public int getMaxRow() {
-                return maxRow;
-            }
-
-            public int getDirection() {
-                return direction;
-            }
-
-            public int getLength() {
-                return length;
-            }
-
-            public void setXRow(int newXRow) {
-                xRow = newXRow;
-                setMaxAndMin();
-            }
-
-            public void setORow(int newORow) {
-                oRow = newORow;
-                setMaxAndMin();
-            }
-
-            private void setMaxAndMin() {
-                if (xRow < oRow) {
-                    minRow = xRow;
-                    maxRow = oRow;
-                } else {
-                    minRow = oRow;
-                    maxRow = xRow;
-                }
-                length = oRow - xRow;
-                direction = (int) Math.signum(length);
-                length = length * direction;
-            }
-        }
     }
 
+    /**
+     * Represents the entries of a column in the grid diagram.
+     */
     public static class Column implements Serializable {
         public static final long serialVersionUID = 0;
 
+        //The row indices of the X and O in this column
         private int xRow;
         private int oRow;
+
+        //The indices again, but as max/min
         private int minRow;
         private int maxRow;
+
         private int direction;
         private int length;
 
@@ -914,31 +1022,52 @@ public class GridDiagram implements Serializable {
             setMaxAndMin();
         }
 
+        /**
+         * @return The row indices of the X and O in this column as a readable string. Useful for debugging.
+         */
         @Override
         public String toString() {
             return "X: " + xRow + " O: " + oRow;
         }
 
+        /**
+         * @return The row index of the X in this column.
+         */
         int getXRow() {
             return xRow;
         }
 
+        /**
+         * @return The row index of the O in this column.
+         */
         int getORow() {
             return oRow;
         }
 
+        /**
+         * @return The smaller of the row indices in this column.
+         */
         int getMinRow() {
             return minRow;
         }
 
+        /**
+         * @return The larger of the row indices in this column.
+         */
         int getMaxRow() {
             return maxRow;
         }
 
+        /**
+         * @return Positive or negative depending on the orientation of the edge in this column. (I think positive is oriented down, but I need to double check)
+         */
         public int getDirection() {
             return direction;
         }
 
+        /**
+         * @return The length of the edge in this column.
+         */
         public int getLength() {
             return length;
         }
