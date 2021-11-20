@@ -1,4 +1,6 @@
-package markovchain;
+package markovchain
+
+import markovchain.MarkovMove
 
 /**
  * Transitions can be chosen in several different ways for a given state space.
@@ -7,13 +9,11 @@ package markovchain;
  *
  * @param <MarkovState> The class representing the objects in the Markov chain.
  * @param <MM>          The MarkovMove class being used by the Markov chain.
- */
-public interface MarkovMoveSelector<MarkovState, MM extends MarkovMove<MarkovState>> {
-
+</MM></MarkovState> */
+interface MarkovMoveSelector<MarkovState, MM : MarkovMove<MarkovState>> {
     /**
      * @param state The current MarkovState, from which a transition is being chosen.
      * @return A MarkovMove which represents a potential transition to a next state.
      */
-    MM getRandomMove(MarkovState state);
-
+    fun getRandomMove(state: MarkovState): MM
 }

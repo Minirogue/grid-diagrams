@@ -7,7 +7,7 @@ class CompositeEnergy<MarkovState, MM : MarkovMove<MarkovState>>
 /**
  * Constructs a CompositeEnergy out of the a List of WangLandauEnergy objects.
  *
- * @param energy List of WangLandauEnergy objects which, together, define a full energy state.
+ * @param energyList List of WangLandauEnergy objects which, together, define a full energy state.
  */ private constructor(
         /**
          * @return Get the set of energy values that comprise this CompositeEnergy as a List.
@@ -27,14 +27,6 @@ class CompositeEnergy<MarkovState, MM : MarkovMove<MarkovState>>
         return CompositeEnergy(newEnergyList)
     }
 
-    override fun copy(): CompositeEnergy<MarkovState, MM> {
-        val newEnergy: MutableList<WangLandauEnergy<MarkovState, MM, *>> = ArrayList(energyList.size)
-        for (oldEnergy: WangLandauEnergy<MarkovState, MM, *> in energyList) {
-            newEnergy.add(oldEnergy.copy() as WangLandauEnergy<MarkovState, MM, *>)
-        }
-        return CompositeEnergy(newEnergy)
-    }
-
     override fun hashCode(): Int {
         var newHash = 0
         for (componentEnergy in energyList) {
@@ -44,12 +36,12 @@ class CompositeEnergy<MarkovState, MM : MarkovMove<MarkovState>>
     }
 
     /**
-     * @param o Object to compare.
+     * @param other Object to compare.
      * @return True if o is a CompositeEnergy that contains energies of the same type, in the same order, that are equal.
      */
-    override fun equals(o: Any?): Boolean {
-        return if (o is CompositeEnergy<*, *>) {
-            val otherEnergyArr: List<*> = o.energyList
+    override fun equals(other: Any?): Boolean {
+        return if (other is CompositeEnergy<*, *>) {
+            val otherEnergyArr: List<*> = other.energyList
             if (otherEnergyArr.size != energyList.size) {
                 return false
             }
@@ -86,10 +78,10 @@ class CompositeEnergy<MarkovState, MM : MarkovMove<MarkovState>>
      */(//Factories for each energy being composed
             private val wangLandauEnergyFactories: List<WangLandauEnergyFactory<MarkovState, MM, *>>) : WangLandauEnergyFactory<MarkovState, MM, CompositeEnergy<MarkovState, MM>>() {
 
-        override fun getEnergyFromState(markovState: MarkovState): CompositeEnergy<MarkovState, MM> {
+        override fun getEnergyFromState(state: MarkovState): CompositeEnergy<MarkovState, MM> {
             val newEnergy: MutableList<WangLandauEnergy<MarkovState, MM, *>> = ArrayList()
             for (factory in wangLandauEnergyFactories) {
-                newEnergy.add(factory.getEnergyFromState(markovState) as WangLandauEnergy<MarkovState, MM, *>)
+                newEnergy.add(factory.getEnergyFromState(state) as WangLandauEnergy<MarkovState, MM, *>)
             }
             return CompositeEnergy(newEnergy)
         }
