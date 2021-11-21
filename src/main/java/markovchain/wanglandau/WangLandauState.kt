@@ -1,37 +1,12 @@
-package markovchain.wanglandau;
+package markovchain.wanglandau
 
-import markovchain.wanglandau.energy.WangLandauEnergy;
+import markovchain.wanglandau.energy.WangLandauEnergy
 
 /**
  * A wrapper class representing a state in the Markov chain and its corresponding energy value.
  *
- * @param <MarkovState> The class representing states in the Markov Chain
+ * @param MarkovState The class type representing states in the Markov Chain
+ * @param state  The underlying MarkovState represented by this object.
+ * @param energy The energy value of the given state.
  */
-public class WangLandauState<MarkovState, E extends WangLandauEnergy<MarkovState, ?, E>> {
-    private final MarkovState state;
-    private final E energy;
-
-    /**
-     * @param state  The underlying MarkovState represented by this object.
-     * @param energy The energy value of the given state.
-     */
-    WangLandauState(MarkovState state, E energy) {
-        this.state = state;
-        this.energy = energy;
-    }
-
-    /**
-     * @return The state in the Markov chain represented by this object.
-     */
-    public MarkovState getState() {
-        return state;
-    }
-
-    /**
-     * @return The energy of the state obtained from {@link #getState()}
-     */
-    public E getEnergy() {
-        return energy;
-    }
-
-}
+data class WangLandauState<MarkovState, E : WangLandauEnergy<MarkovState, *, E>>(val state: MarkovState, val energy: E)
