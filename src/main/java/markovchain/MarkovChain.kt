@@ -1,14 +1,12 @@
 package markovchain
 
-import java.util.ArrayList
-
 /**
  * This class represents the core logic of a Markov chain as it is typically used for Monte Carlo sampling.
  *
  * @param <MarkovState> The class that represents individual states in the Markov chain. This could be a class representing the Ising model, knot diagrams, knot embeddings, etc.
  * @param <MM>          The class that represents transitions in the Markov chain.
 </MM></MarkovState> */
-abstract class MarkovChain<MarkovState: Any, MM : MarkovMove<MarkovState>> {
+abstract class MarkovChain<MarkovState : Any, MM : MarkovMove<MarkovState>> {
     /**
      * Perform a single step in the Markov chain.
      *
