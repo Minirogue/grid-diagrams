@@ -10,11 +10,6 @@ import markovchain.MarkovMove
 abstract class WangLandauEnergy<MarkovState, MM : MarkovMove<MarkovState>, E : WangLandauEnergy<MarkovState, MM, E>> {
 
     /**
-     * @return A new WangLandauEnergy object holding the same value as this one.
-     */
-    abstract fun copy(): E
-
-    /**
      * @param move A proposed MarkovMove object.
      * @return An energy object containing the energy of the state that will be obtained by performing the given move.
      */
